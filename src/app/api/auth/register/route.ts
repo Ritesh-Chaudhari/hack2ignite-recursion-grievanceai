@@ -31,7 +31,9 @@ export async function POST(request: Request) {
     }
 
     const user = await registerUser(name, email, password, role);
-    const response = NextResponse.json({ user }, { status: 201 });
+    // Only public fields ever leave the server (never the password hash).
+    const publicUser = { id: user.id, name: user.name, email: user.email, role: user.role };
+    const response = NextResponse.json({ user: publicUser }, { status: 201 });
     return setSessionCookie(response, {
       userId: user.id,
       email: user.email,

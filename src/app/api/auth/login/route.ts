@@ -16,7 +16,9 @@ export async function POST(request: Request) {
     }
 
     const user = await loginUser(email, password);
-    const response = NextResponse.json({ user });
+    // Only public fields ever leave the server (never the password hash).
+    const publicUser = { id: user.id, name: user.name, email: user.email, role: user.role };
+    const response = NextResponse.json({ user: publicUser });
     return setSessionCookie(response, {
       userId: user.id,
       email: user.email,

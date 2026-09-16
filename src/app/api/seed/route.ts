@@ -166,7 +166,9 @@ const SEEDS: SeedSpec[] = [
 
 export async function POST() {
   const existing = await countGrievances();
-  if (existing > 0) {
+  // Allow seeding even after a few real test submissions, so the demo
+  // dashboard is always populated; only skip when data is already rich.
+  if (existing >= 5) {
     return NextResponse.json({ seeded: false, message: "Data already exists." });
   }
 
