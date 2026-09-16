@@ -1,0 +1,42 @@
+# dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# next.js
+.next/
+out/
+build/
+dist/
+
+# production
+*.tsbuildinfo
+next-env.d.ts
+
+# environment variables — never commit secrets (GEMINI_API_KEY, DB creds)
+.env
+.env.*
+!.env.example
+
+# local database fallback files
+/data/*.json
+
+# logs
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# testing / coverage
+coverage/
+
+# tooling workspace
+/.freebuff/
+
+# editor and OS
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+Thumbs.db
