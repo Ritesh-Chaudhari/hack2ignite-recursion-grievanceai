@@ -367,7 +367,7 @@ export default function SubmitPage() {
 
       {/* AI processing overlay */}
       {submitting && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-sm animate-fade-in">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-sm animate-fade-in text-white">
           <div className="mx-4 w-full max-w-sm animate-pop rounded-2xl bg-white p-7 shadow-2xl">
             <div className="flex items-center gap-3">
               <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-soft text-xl">

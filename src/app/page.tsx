@@ -56,7 +56,7 @@ export default function LandingPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-navy-soft to-primary/90">
+      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-navy-soft to-primary/90 text-white">
         <div
           aria-hidden
           className="pointer-events-none absolute -top-24 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-teal-accent/20 blur-3xl"

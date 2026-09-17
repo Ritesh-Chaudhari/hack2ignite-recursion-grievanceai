@@ -22,7 +22,7 @@ export default function RootLayout({
           <div className="flex min-h-screen flex-col">
             <Navbar />
             <main id="main-content" className="flex-1">{children}</main>
-            <footer className="border-t border-line bg-navy py-6" role="contentinfo">
+            <footer className="border-t border-line bg-navy py-6 text-white" role="contentinfo">
               <div className="mx-auto flex max-w-7xl flex-col items-center justify-between gap-2 px-4 text-sm text-white/70 sm:flex-row sm:px-6">
                 <p>
                   GrievanceAI — built for Hack 2 Ignite (Problem AI-04) by Team
