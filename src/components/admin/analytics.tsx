@@ -119,18 +119,18 @@ export const Analytics = memo(function Analytics({
       >
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={byCategory} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f1" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5e0" vertical={false} />
             <XAxis
               dataKey="name"
-              tick={{ fontSize: 11, fill: "#5b6478" }}
+              tick={{ fontSize: 11, fill: "#475569" }}
               axisLine={false}
               tickLine={false}
               interval={0}
               angle={-20}
               dy={8}
             />
-            <YAxis tick={{ fontSize: 11, fill: "#5b6478" }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip cursor={{ fill: "rgba(79,70,229,0.06)" }} contentStyle={{ borderRadius: 12, border: "1px solid #e4e8f1", fontSize: 12 }} />
+            <YAxis tick={{ fontSize: 11, fill: "#475569" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip cursor={{ fill: "rgba(79,70,229,0.06)" }} contentStyle={{ borderRadius: 12, border: "1px solid #d1d5e0", fontSize: 12 }} />
             <Bar dataKey="count" radius={[6, 6, 0, 0]}>
               {byCategory.map((entry, i) => (
                 <Cell key={entry.name} fill={CATEGORY_COLORS[i % CATEGORY_COLORS.length]} />
@@ -161,7 +161,7 @@ export const Analytics = memo(function Analytics({
                 <Cell key={entry.name} fill={PRIORITY_COLORS[entry.name]} />
               ))}
             </Pie>
-            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e4e8f1", fontSize: 12 }} />
+            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #d1d5e0", fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
         <div className="mt-1 flex flex-wrap justify-center gap-3 text-xs font-medium text-muted">
@@ -184,16 +184,16 @@ export const Analytics = memo(function Analytics({
       >
         <ResponsiveContainer width="100%" height="100%">
           <LineChart data={overTime} margin={{ top: 8, right: 8, left: -22, bottom: 0 }}>
-            <CartesianGrid strokeDasharray="3 3" stroke="#e4e8f1" vertical={false} />
+            <CartesianGrid strokeDasharray="3 3" stroke="#d1d5e0" vertical={false} />
             <XAxis
               dataKey="day"
-              tick={{ fontSize: 10, fill: "#5b6478" }}
+              tick={{ fontSize: 10, fill: "#475569" }}
               axisLine={false}
               tickLine={false}
               interval={2}
             />
-            <YAxis tick={{ fontSize: 11, fill: "#5b6478" }} axisLine={false} tickLine={false} allowDecimals={false} />
-            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #e4e8f1", fontSize: 12 }} />
+            <YAxis tick={{ fontSize: 11, fill: "#475569" }} axisLine={false} tickLine={false} allowDecimals={false} />
+            <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #d1d5e0", fontSize: 12 }} />
             <Line
               type="monotone"
               dataKey="count"

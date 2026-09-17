@@ -392,7 +392,7 @@ export default function SubmitPage() {
                 <li
                   key={s}
                   className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
-                    i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted/50"
+                    i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted/70"
                   }`}
                 >
                   <span

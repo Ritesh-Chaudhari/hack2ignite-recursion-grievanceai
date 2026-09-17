@@ -26,7 +26,7 @@ export default function GlobalError({
           homepage.
         </p>
         {error.digest && (
-          <p className="mt-2 text-xs text-muted/60">
+          <p className="mt-2 text-xs text-muted/80">
             Error ID: {error.digest}
           </p>
         )}

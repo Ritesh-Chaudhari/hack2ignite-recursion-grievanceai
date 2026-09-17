@@ -8,7 +8,7 @@
   --color-canvas: #f4f6fb;
   --color-surface: #ffffff;
   --color-ink: #0f172a;
-  --color-muted: #5b6478;
+  --color-muted: #475569;
   --color-line: #e4e8f1;
 
   --color-primary: #4f46e5;
@@ -114,7 +114,7 @@ body {
 
 .field {
   @apply w-full rounded-xl border border-line bg-white px-3.5 py-2.5 text-sm text-ink
-    placeholder:text-muted/60 shadow-sm transition-all duration-200
+    placeholder:text-muted/70 shadow-sm transition-all duration-200
     focus:border-primary focus:ring-4 focus:ring-primary/15 focus:outline-none;
 }
 
