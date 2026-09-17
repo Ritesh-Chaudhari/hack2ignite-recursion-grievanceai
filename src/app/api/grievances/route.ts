@@ -9,6 +9,11 @@ import {
   getSession,
 } from "@/lib/session";
 import {
+  sanitizeDescription,
+  sanitizeLocation,
+  sanitizeTitle,
+} from "@/lib/sanitize";
+import {
   insertGrievance,
   listAllGrievances,
   listGrievancesByUser,
@@ -33,9 +38,9 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: "Invalid request body." }, { status: 400 });
   }
 
-  const title = body.title?.trim() ?? "";
-  const description = body.description?.trim() ?? "";
-  const location = body.location?.trim() ?? "";
+  const title = sanitizeTitle(body.title ?? "");
+  const description = sanitizeDescription(body.description ?? "");
+  const location = sanitizeLocation(body.location ?? "");
   const language = (body.language ?? "English") as GrievanceLanguage;
   const category = (body.category ?? "Other") as Category;
 

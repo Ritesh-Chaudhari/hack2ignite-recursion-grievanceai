@@ -1,3 +1,4 @@
+import { memo } from "react";
 import type { Category, GrievanceLanguage, Priority, Status } from "@/lib/types";
 
 const PRIORITY_STYLES: Record<Priority, string> = {
@@ -28,7 +29,7 @@ const LANGUAGE_LABELS: Record<GrievanceLanguage, string> = {
   Marathi: "मराठी",
 };
 
-export function PriorityBadge({ priority }: { priority: Priority }) {
+export const PriorityBadge = memo(function PriorityBadge({ priority }: { priority: Priority }) {
   return (
     <span
       className={`inline-flex items-center gap-1.5 rounded-full border px-2.5 py-0.5 text-xs font-semibold ${PRIORITY_STYLES[priority]} ${
@@ -39,9 +40,9 @@ export function PriorityBadge({ priority }: { priority: Priority }) {
       {priority}
     </span>
   );
-}
+});
 
-export function StatusBadge({ status }: { status: Status }) {
+export const StatusBadge = memo(function StatusBadge({ status }: { status: Status }) {
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-semibold ${STATUS_STYLES[status]}`}
@@ -49,9 +50,9 @@ export function StatusBadge({ status }: { status: Status }) {
       {status}
     </span>
   );
-}
+});
 
-export function CategoryBadge({ category }: { category: Category }) {
+export const CategoryBadge = memo(function CategoryBadge({ category }: { category: Category }) {
   return (
     <span
       className={`inline-flex items-center rounded-full border px-2.5 py-0.5 text-xs font-medium ${CATEGORY_STYLES[category]}`}
@@ -59,12 +60,12 @@ export function CategoryBadge({ category }: { category: Category }) {
       {category}
     </span>
   );
-}
+});
 
-export function LanguageBadge({ language }: { language: GrievanceLanguage }) {
+export const LanguageBadge = memo(function LanguageBadge({ language }: { language: GrievanceLanguage }) {
   return (
     <span className="inline-flex items-center rounded-full border border-line bg-canvas px-2.5 py-0.5 text-xs font-medium text-muted">
       {LANGUAGE_LABELS[language]}
     </span>
   );
-}
+});

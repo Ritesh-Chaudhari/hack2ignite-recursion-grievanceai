@@ -2,6 +2,7 @@ import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
 import mongoose, { type Model, Schema } from "mongoose";
+import { validateEnv } from "@/lib/env";
 import type {
   Category,
   Grievance,
@@ -77,6 +78,19 @@ async function getMongoModels(): Promise<StoreModels | null> {
       console.error("[store] MongoDB error:", err.message),
     );
     await mongoose.connect(uri, { dbName: "grievance_ai" });
+
+    // Graceful shutdown: close the connection when the process exits.
+    const shutdown = async () => {
+      try {
+        await mongoose.disconnect();
+        console.log("[store] MongoDB connection closed.");
+      } catch {
+        // Ignore errors during shutdown
+      }
+    };
+    process.on("SIGINT", shutdown);
+    process.on("SIGTERM", shutdown);
+
     const User =
       (mongoose.models.User as Model<UserRecord>) ||
       mongoose.model<UserRecord>("User", USER_SCHEMA);
@@ -141,6 +155,10 @@ export async function saveUser(input: {
     await models.User.create(user);
   } else {
     const local = await readLocal();
+    // Enforce email uniqueness for the local file store.
+    if (local.users.some((u) => u.email === user.email)) {
+      throw new Error("An account with this email already exists.");
+    }
     local.users.push(user);
     await writeLocal(local);
   }
@@ -200,7 +218,7 @@ export async function updateGrievance(
     return models.Grievance.findOneAndUpdate(
       { id },
       { $set: patch },
-      { new: true, lean: true },
+      { new: true },
     ).lean<Grievance | null>();
   }
   const local = await readLocal();
@@ -270,3 +288,6 @@ export async function countGrievances(): Promise<number> {
 }
 
 export type { Grievance, PublicUser, Category, Priority, Status, GrievanceLanguage };
+
+// Validate environment on module load (runs once).
+validateEnv();

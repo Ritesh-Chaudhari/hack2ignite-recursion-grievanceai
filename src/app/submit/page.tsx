@@ -2,7 +2,6 @@
 
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
-import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/components/auth-provider";
 import {
   CategoryBadge,
@@ -169,21 +168,11 @@ export default function SubmitPage() {
     const dept = DEPARTMENTS[g.category];
     return (
       <div className="mx-auto max-w-2xl px-4 py-14">
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9, y: 16 }}
-          animate={{ opacity: 1, scale: 1, y: 0 }}
-          transition={{ type: "spring", stiffness: 260, damping: 22 }}
-          className="card overflow-hidden"
-        >
+        <div className="card animate-pop overflow-hidden">
           <div className="bg-gradient-to-br from-primary to-primary-dark px-8 py-10 text-center text-white">
-            <motion.div
-              initial={{ scale: 0 }}
-              animate={{ scale: 1 }}
-              transition={{ delay: 0.15, type: "spring", stiffness: 300, damping: 15 }}
-              className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-3xl backdrop-blur"
-            >
+            <div className="mx-auto flex h-16 w-16 items-center justify-center rounded-full bg-white/20 text-3xl backdrop-blur">
               ✓
-            </motion.div>
+            </div>
             <h1 className="mt-4 text-2xl font-black">Grievance received</h1>
             <p className="mt-1 text-sm text-white/80">
               Reference #{g.id.slice(0, 8).toUpperCase()}
@@ -215,12 +204,7 @@ export default function SubmitPage() {
             </div>
 
             {result.similar.length > 0 && (
-              <motion.div
-                initial={{ opacity: 0, y: 8 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: 0.3 }}
-                className="rounded-xl border border-warn/25 bg-warn-soft/50 p-4"
-              >
+              <div className="animate-fade-up rounded-xl border border-warn/25 bg-warn-soft/50 p-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-warn">
                   🔗 {result.similar.length} similar report
                   {result.similar.length > 1 ? "s" : ""} grouped with yours
@@ -236,7 +220,7 @@ export default function SubmitPage() {
                 <p className="mt-2 text-xs text-muted">
                   Clustered complaints help the department act faster on shared problems.
                 </p>
-              </motion.div>
+              </div>
             )}
 
             <div className="flex flex-col gap-3 pt-1 sm:flex-row">
@@ -248,7 +232,7 @@ export default function SubmitPage() {
               </button>
             </div>
           </div>
-        </motion.div>
+        </div>
       </div>
     );
   }
@@ -275,11 +259,13 @@ export default function SubmitPage() {
           <span className="label">
             Write in <span className="text-muted">(AI auto-detects the language)</span>
           </span>
-          <div className="grid grid-cols-3 gap-2">
+          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Select language for your grievance">
             {LANGUAGES.map((lang) => (
               <button
                 key={lang}
                 type="button"
+                role="radio"
+                aria-checked={form.language === lang}
                 onClick={() => update("language", lang)}
                 className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
                   form.language === lang
@@ -304,6 +290,8 @@ export default function SubmitPage() {
             value={form.title}
             onChange={(e) => update("title", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, title: true }))}
+            aria-required="true"
+            aria-invalid={!!showFieldError("title")}
           />
           {showFieldError("title") && (
             <p className="mt-1.5 text-xs font-medium text-danger">{errors.title}</p>
@@ -327,6 +315,8 @@ export default function SubmitPage() {
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, description: true }))}
+            aria-required="true"
+            aria-invalid={!!showFieldError("description")}
           />
           {showFieldError("description") && (
             <p className="mt-1.5 text-xs font-medium text-danger">{errors.description}</p>
@@ -345,6 +335,8 @@ export default function SubmitPage() {
               value={form.location}
               onChange={(e) => update("location", e.target.value)}
               onBlur={() => setTouched((t) => ({ ...t, location: true }))}
+              aria-required="true"
+              aria-invalid={!!showFieldError("location")}
             />
             {showFieldError("location") && (
               <p className="mt-1.5 text-xs font-medium text-danger">{errors.location}</p>
@@ -378,68 +370,54 @@ export default function SubmitPage() {
         </button>
       </form>
 
-      {/* AI processing overlay */}
-      <AnimatePresence>
-        {submitting && (
-          <motion.div
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            exit={{ opacity: 0 }}
-            className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-sm"
-          >
-            <motion.div
-              initial={{ scale: 0.92, y: 12 }}
-              animate={{ scale: 1, y: 0 }}
-              transition={{ type: "spring", stiffness: 260, damping: 24 }}
-              className="mx-4 w-full max-w-sm rounded-2xl bg-white p-7 shadow-2xl"
-            >
-              <div className="flex items-center gap-3">
-                <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-soft text-xl">
-                  🧠
-                  <span className="absolute inset-0 animate-pulse-ring rounded-2xl" />
-                </span>
-                <div>
-                  <p className="text-sm font-black text-ink">Gemini is triaging your grievance</p>
-                  <p className="text-xs text-muted">Usually takes a few seconds</p>
-                </div>
+      {/* AI processing overlay — CSS transitions instead of framer-motion */}
+      {submitting && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-sm animate-fade-in">
+          <div className="mx-4 w-full max-w-sm animate-pop rounded-2xl bg-white p-7 shadow-2xl">
+            <div className="flex items-center gap-3">
+              <span className="relative flex h-11 w-11 items-center justify-center rounded-2xl bg-primary-soft text-xl">
+                🧠
+                <span className="absolute inset-0 animate-pulse-ring rounded-2xl" />
+              </span>
+              <div>
+                <p className="text-sm font-black text-ink">Gemini is triaging your grievance</p>
+                <p className="text-xs text-muted">Usually takes a few seconds</p>
               </div>
+            </div>
 
-              <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-canvas">
-                <motion.div
-                  className="h-full rounded-full bg-gradient-to-r from-primary to-teal-accent"
-                  initial={{ width: "5%" }}
-                  animate={{ width: `${((stage + 1) / AI_STAGES.length) * 100}%` }}
-                  transition={{ duration: 0.45 }}
-                />
-              </div>
+            <div className="mt-5 h-1.5 overflow-hidden rounded-full bg-canvas">
+              <div
+                className="h-full rounded-full bg-gradient-to-r from-primary to-teal-accent transition-all duration-450"
+                style={{ width: `${((stage + 1) / AI_STAGES.length) * 100}%` }}
+              />
+            </div>
 
-              <ul className="mt-4 space-y-2">
-                {AI_STAGES.map((s, i) => (
-                  <li
-                    key={s}
-                    className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
-                      i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted/50"
+            <ul className="mt-4 space-y-2">
+              {AI_STAGES.map((s, i) => (
+                <li
+                  key={s}
+                  className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
+                    i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted/50"
+                  }`}
+                >
+                  <span
+                    className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
+                      i < stage
+                        ? "bg-ok text-white"
+                        : i === stage
+                          ? "bg-primary text-white"
+                          : "border border-line bg-canvas text-muted"
                     }`}
                   >
-                    <span
-                      className={`flex h-4 w-4 items-center justify-center rounded-full text-[9px] font-bold ${
-                        i < stage
-                          ? "bg-ok text-white"
-                          : i === stage
-                            ? "bg-primary text-white"
-                            : "border border-line bg-canvas text-muted"
-                      }`}
-                    >
-                      {i < stage ? "✓" : i + 1}
-                    </span>
-                    {s}
-                  </li>
-                ))}
-              </ul>
-            </motion.div>
-          </motion.div>
-        )}
-      </AnimatePresence>
+                    {i < stage ? "✓" : i + 1}
+                  </span>
+                  {s}
+                </li>
+              ))}
+            </ul>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

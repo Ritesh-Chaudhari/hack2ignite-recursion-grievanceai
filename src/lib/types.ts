@@ -72,5 +72,7 @@ export interface SubmitGrievanceResponse {
     title: string;
     location: string;
     createdAt: string;
+    /** Why these were flagged as similar. */
+    reasons?: string[];
   }>;
 }

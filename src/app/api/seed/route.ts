@@ -164,12 +164,12 @@ const SEEDS: SeedSpec[] = [
   },
 ];
 
-export async function POST() {
+async function doSeed(): Promise<{ seeded: boolean; count?: number }> {
   const existing = await countGrievances();
   // Allow seeding even after a few real test submissions, so the demo
   // dashboard is always populated; only skip when data is already rich.
   if (existing >= 5) {
-    return NextResponse.json({ seeded: false, message: "Data already exists." });
+    return { seeded: false };
   }
 
   const grievances: Grievance[] = SEEDS.map((s, index) => {
@@ -201,5 +201,20 @@ export async function POST() {
   for (const g of grievances) {
     await insertGrievance(g);
   }
-  return NextResponse.json({ seeded: true, count: grievances.length });
+  return { seeded: true, count: grievances.length };
+}
+
+/** POST /api/seed — Manual seed endpoint. */
+export async function POST() {
+  const result = await doSeed();
+  if (!result.seeded) {
+    return NextResponse.json({ seeded: false, message: "Data already exists." });
+  }
+  return NextResponse.json({ seeded: true, count: result.count });
+}
+
+/** GET /api/seed — Auto-seed on first boot (called by the app on initial load). */
+export async function GET() {
+  const result = await doSeed();
+  return NextResponse.json(result);
 }

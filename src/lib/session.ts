@@ -6,9 +6,17 @@ export const SESSION_COOKIE = "grievance_session";
 const SESSION_DAYS = 7;
 
 function getSecretKey(): Uint8Array {
-  // Dev fallback keeps the prototype runnable without extra env setup.
-  const secret =
-    process.env.AUTH_SECRET ?? "grievance-ai-dev-secret-do-not-use-in-production";
+  const secret = process.env.AUTH_SECRET;
+  if (!secret) {
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        "AUTH_SECRET must be set in production. " +
+        "Generate one with: openssl rand -hex 32",
+      );
+    }
+    // Dev fallback keeps the prototype runnable without extra env setup.
+    return new TextEncoder().encode("grievance-ai-dev-secret-do-not-use-in-production");
+  }
   return new TextEncoder().encode(secret);
 }
 

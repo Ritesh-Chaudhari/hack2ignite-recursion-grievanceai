@@ -11,7 +11,7 @@ export default function SignupPage() {
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [role, setRole] = useState<"citizen" | "admin">("citizen");
+  const [role] = useState<"citizen" | "admin">("citizen");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
@@ -80,30 +80,10 @@ export default function SignupPage() {
             />
           </div>
 
-          <div>
-            <span className="label">I am a</span>
-            <div className="grid grid-cols-2 gap-2">
-              {(
-                [
-                  { value: "citizen", label: "Citizen", hint: "Report & track issues" },
-                  { value: "admin", label: "Officer", hint: "Triage & resolve" },
-                ] as const
-              ).map((opt) => (
-                <button
-                  key={opt.value}
-                  type="button"
-                  onClick={() => setRole(opt.value)}
-                  className={`rounded-xl border px-4 py-3 text-left transition-all duration-200 ${
-                    role === opt.value
-                      ? "border-primary bg-primary-soft ring-2 ring-primary/20"
-                      : "border-line bg-white hover:border-primary/40"
-                  }`}
-                >
-                  <span className="block text-sm font-bold text-ink">{opt.label}</span>
-                  <span className="block text-xs text-muted">{opt.hint}</span>
-                </button>
-              ))}
-            </div>
+          <div className="rounded-xl border border-line bg-canvas p-4">
+            <span className="block text-sm font-bold text-ink">Citizen account</span>
+            <span className="block text-xs text-muted">Report & track issues in your city</span>
+            <p className="mt-2 text-xs text-muted">Need an officer account? <a href="/login" className="font-semibold text-primary hover:underline">Use a demo officer login</a></p>
           </div>
 
           {error && (

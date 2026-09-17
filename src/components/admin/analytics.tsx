@@ -1,7 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
-import { motion } from "framer-motion";
+import { memo, useMemo } from "react";
 import {
   Bar,
   BarChart,
@@ -46,36 +45,46 @@ function ChartCard({
   delay?: number;
 }) {
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 16 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ delay, duration: 0.45 }}
-      className="card p-5"
+    <div
+      className="card animate-fade-up p-5"
+      style={{ animationDelay: `${delay * 1000}ms` }}
     >
       <h3 className="text-sm font-bold text-ink">{title}</h3>
       <p className="mb-3 text-xs text-muted">{subtitle}</p>
       <div className="h-56">{children}</div>
-    </motion.div>
+    </div>
   );
 }
 
-export function Analytics({ grievances }: { grievances: Grievance[] }) {
+export const Analytics = memo(function Analytics({
+  grievances,
+  filterCategory,
+}: {
+  grievances: Grievance[];
+  filterCategory?: string;
+}) {
+  // Apply optional department/category filter
+  const filtered = useMemo(() => {
+    if (!filterCategory || filterCategory === "all") return grievances;
+    return grievances.filter((g) => g.category === filterCategory);
+  }, [grievances, filterCategory]);
+
   const byCategory = useMemo(
     () =>
       CATEGORIES.map((c) => ({
         name: c,
-        count: grievances.filter((g) => g.category === c).length,
+        count: filtered.filter((g) => g.category === c).length,
       })),
-    [grievances],
+    [filtered],
   );
 
   const byPriority = useMemo(
     () =>
       PRIORITIES.map((p) => ({
         name: p,
-        value: grievances.filter((g) => g.priority === p).length,
+        value: filtered.filter((g) => g.priority === p).length,
       })),
-    [grievances],
+    [filtered],
   );
 
   const overTime = useMemo(() => {
@@ -87,7 +96,7 @@ export function Analytics({ grievances }: { grievances: Grievance[] }) {
       d.setDate(d.getDate() - i);
       const next = new Date(d);
       next.setDate(next.getDate() + 1);
-      const count = grievances.filter((g) => {
+      const count = filtered.filter((g) => {
         const t = new Date(g.createdAt).getTime();
         return t >= d.getTime() && t < next.getTime();
       }).length;
@@ -97,9 +106,9 @@ export function Analytics({ grievances }: { grievances: Grievance[] }) {
       });
     }
     return buckets;
-  }, [grievances]);
+  }, [filtered]);
 
-  const total = grievances.length;
+  const total = filtered.length;
 
   return (
     <div className="grid gap-5 lg:grid-cols-3">
@@ -146,7 +155,7 @@ export function Analytics({ grievances }: { grievances: Grievance[] }) {
               outerRadius={76}
               paddingAngle={3}
               strokeWidth={0}
-              isAnimationActive
+              isAnimationActive={false}
             >
               {byPriority.map((entry) => (
                 <Cell key={entry.name} fill={PRIORITY_COLORS[entry.name]} />
@@ -198,4 +207,4 @@ export function Analytics({ grievances }: { grievances: Grievance[] }) {
       </ChartCard>
     </div>
   );
-}
+});

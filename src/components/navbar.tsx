@@ -4,17 +4,34 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useState } from "react";
 import { useAuth } from "@/components/auth-provider";
+import { getLocale, setLocale, LOCALES, type Locale } from "@/lib/i18n";
 
-const LINKS: Array<{ href: string; label: string }> = [
-  { href: "/submit", label: "Submit Grievance" },
-  { href: "/my-grievances", label: "My Grievances" },
-  { href: "/admin", label: "Admin Dashboard" },
+const LINKS: Array<{ href: string; label: string; labelKey: string }> = [
+  { href: "/submit", label: "Submit Grievance", labelKey: "nav.submit" },
+  { href: "/track", label: "Track Status", labelKey: "nav.track" },
+  { href: "/my-grievances", label: "My Grievances", labelKey: "nav.myGrievances" },
+  { href: "/admin", label: "Admin Dashboard", labelKey: "nav.admin" },
 ];
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
   const pathname = usePathname();
   const [menuOpen, setMenuOpen] = useState(false);
+  const [locale, setLocaleState] = useState<Locale>("en");
+  const [langOpen, setLangOpen] = useState(false);
+
+  // Initialize locale from localStorage on client side
+  useState(() => {
+    if (typeof window !== "undefined") {
+      setLocaleState(getLocale());
+    }
+  });
+
+  function handleLocaleChange(newLocale: Locale) {
+    setLocaleState(newLocale);
+    setLocale(newLocale);
+    setLangOpen(false);
+  }
 
   return (
     <header className="sticky top-0 z-40 border-b border-line bg-white/85 backdrop-blur-md">
@@ -45,6 +62,35 @@ export function Navbar() {
               </Link>
             );
           })}
+        </div>
+
+        {/* Language switcher */}
+        <div className="relative hidden md:block">
+          <button
+            onClick={() => setLangOpen((v) => !v)}
+            className="flex items-center gap-1 rounded-lg border border-line px-2.5 py-1.5 text-xs font-medium text-muted transition hover:border-primary/40 hover:text-ink"
+            aria-label="Change language"
+            aria-expanded={langOpen}
+          >
+            🌐 {LOCALES.find((l) => l.code === locale)?.nativeLabel ?? "English"}
+          </button>
+          {langOpen && (
+            <div className="absolute right-0 top-full z-50 mt-1 w-36 rounded-xl border border-line bg-white py-1 shadow-lg animate-fade-in">
+              {LOCALES.map((l) => (
+                <button
+                  key={l.code}
+                  onClick={() => handleLocaleChange(l.code)}
+                  className={`flex w-full items-center gap-2 px-3 py-2 text-left text-sm transition hover:bg-canvas ${
+                    locale === l.code ? "font-bold text-primary" : "text-ink"
+                  }`}
+                >
+                  <span>{l.nativeLabel}</span>
+                  <span className="text-xs text-muted">({l.label})</span>
+                  {locale === l.code && <span className="ml-auto text-primary">✓</span>}
+                </button>
+              ))}
+            </div>
+          )}
         </div>
 
         <div className="hidden items-center gap-3 md:flex">
@@ -100,6 +146,28 @@ export function Navbar() {
                 {link.label}
               </Link>
             ))}
+            {/* Mobile language switcher */}
+            <div className="mt-2 border-t border-line pt-3">
+              <p className="px-3 text-xs font-semibold text-muted">Language</p>
+              <div className="mt-1 flex gap-1 px-3">
+                {LOCALES.map((l) => (
+                  <button
+                    key={l.code}
+                    onClick={() => {
+                      handleLocaleChange(l.code);
+                      setMenuOpen(false);
+                    }}
+                    className={`rounded-lg px-2.5 py-1.5 text-xs font-medium transition ${
+                      locale === l.code
+                        ? "bg-primary-soft text-primary-dark"
+                        : "bg-canvas text-muted hover:text-ink"
+                    }`}
+                  >
+                    {l.nativeLabel}
+                  </button>
+                ))}
+              </div>
+            </div>
             <div className="mt-2 border-t border-line pt-3">
               {user ? (
                 <button

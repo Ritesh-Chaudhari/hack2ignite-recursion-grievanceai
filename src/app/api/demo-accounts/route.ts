@@ -12,7 +12,14 @@ const DEMO_ACCOUNTS: Array<{ name: string; email: string; password: string; role
   { name: "Demo Citizen", email: "citizen@grievance.ai", password: "demo1234", role: "citizen" },
 ];
 
-export async function POST() {
+export async function POST(request: Request) {
+  // Guard: only allow from same-origin requests (not cross-origin).
+  const origin = request.headers.get("origin");
+  const host = request.headers.get("host");
+  if (origin && host && !origin.includes(host)) {
+    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
+  }
+
   const created: string[] = [];
   for (const acct of DEMO_ACCOUNTS) {
     const existing = await getUserByEmail(acct.email);

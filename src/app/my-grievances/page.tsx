@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
-import { motion } from "framer-motion";
 import { useAuth } from "@/components/auth-provider";
 import {
   CategoryBadge,
@@ -109,12 +108,10 @@ export default function MyGrievancesPage() {
       ) : (
         <div className="mt-8 space-y-5">
           {grievances.map((g, i) => (
-            <motion.article
+            <article
               key={g.id}
-              initial={{ opacity: 0, y: 18 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: Math.min(i * 0.06, 0.4), duration: 0.4 }}
-              className="card card-hover p-6"
+              className="card card-hover animate-fade-up p-6"
+              style={{ animationDelay: `${Math.min(i * 60, 400)}ms` }}
             >
               <div className="flex flex-wrap items-start justify-between gap-3">
                 <div className="min-w-0">
@@ -147,7 +144,7 @@ export default function MyGrievancesPage() {
               <div className="mt-5 border-t border-line pt-5">
                 <StatusTimeline status={g.status} />
               </div>
-            </motion.article>
+            </article>
           ))}
         </div>
       )}
