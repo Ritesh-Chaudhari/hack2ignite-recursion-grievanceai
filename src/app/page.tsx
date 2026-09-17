@@ -108,8 +108,8 @@ export default function LandingPage() {
               <div className="mb-3 flex h-11 w-11 items-center justify-center rounded-xl bg-primary-soft text-xl">
                 {f.icon}
               </div>
-              <h3 className="text-base font-bold text-ink">{f.title}</h3>
-              <p className="mt-1.5 text-sm leading-relaxed text-muted">{f.body}</p>
+              <h3 className="text-base font-bold text-primary">{f.title}</h3>
+              <p className="mt-1.5 text-sm leading-relaxed text-primary/70">{f.body}</p>
             </div>
           ))}
         </div>
@@ -118,7 +118,7 @@ export default function LandingPage() {
       {/* How it works */}
       <section className="border-y border-line bg-white py-20">
         <div className="mx-auto max-w-5xl px-4 sm:px-6">
-          <h2 className="text-center text-3xl font-black tracking-tight text-ink">
+          <h2 className="text-center text-3xl font-black tracking-tight text-primary">
             From complaint to resolution in three steps
           </h2>
           <div className="mt-12 grid gap-8 md:grid-cols-3">
@@ -127,8 +127,8 @@ export default function LandingPage() {
                 <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-gradient-to-br from-primary to-primary-dark text-xl font-black text-white shadow-lg shadow-primary/30">
                   {s.step}
                 </div>
-                <h3 className="mt-4 text-lg font-bold text-ink">{s.title}</h3>
-                <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-muted">
+                <h3 className="mt-4 text-lg font-bold text-primary">{s.title}</h3>
+                <p className="mx-auto mt-2 max-w-xs text-sm leading-relaxed text-primary/70">
                   {s.body}
                 </p>
                 {i < STEPS.length - 1 && (
@@ -145,14 +145,14 @@ export default function LandingPage() {
 
       {/* Categories */}
       <section className="mx-auto max-w-5xl px-4 py-20 text-center sm:px-6">
-        <h2 className="text-2xl font-black tracking-tight text-ink">
+        <h2 className="text-2xl font-black tracking-tight text-primary">
           Covering the issues that matter
         </h2>
         <div className="mt-8 flex flex-wrap justify-center gap-3">
           {CATEGORIES.map((c) => (
             <span
               key={c}
-              className="card card-hover cursor-default px-5 py-2.5 text-sm font-semibold text-ink"
+              className="card card-hover cursor-default px-5 py-2.5 text-sm font-semibold text-primary"
             >
               {c}
             </span>
@@ -188,11 +188,11 @@ export default function LandingPage() {
                   👤
                 </span>
                 <div>
-                  <h3 className="text-lg font-bold text-ink">For Citizens</h3>
-                  <p className="text-sm text-muted">Report & track issues</p>
+                  <h3 className="text-lg font-bold text-primary">For Citizens</h3>
+                  <p className="text-sm text-primary/70">Report & track issues</p>
                 </div>
               </div>
-              <ul className="mt-4 space-y-2 text-sm text-muted">
+              <ul className="mt-4 space-y-2 text-sm text-primary/70">
                 <li className="flex items-start gap-2">
                   <span className="text-primary">✓</span>
                   File grievances in any language
@@ -214,11 +214,11 @@ export default function LandingPage() {
                   🛡️
                 </span>
                 <div>
-                  <h3 className="text-lg font-bold text-ink">For Officers</h3>
-                  <p className="text-sm text-muted">Investigate & resolve</p>
+                  <h3 className="text-lg font-bold text-primary">For Officers</h3>
+                  <p className="text-sm text-primary/70">Investigate & resolve</p>
                 </div>
               </div>
-              <ul className="mt-4 space-y-2 text-sm text-muted">
+              <ul className="mt-4 space-y-2 text-sm text-primary/70">
                 <li className="flex items-start gap-2">
                   <span className="text-primary">✓</span>
                   AI-prioritized grievance queue

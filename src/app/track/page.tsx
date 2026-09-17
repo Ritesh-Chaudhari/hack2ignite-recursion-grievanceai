@@ -48,10 +48,10 @@ export default function TrackPage() {
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
           🔍
         </div>
-        <h1 className="text-3xl font-black tracking-tight text-ink">
+        <h1 className="text-3xl font-black tracking-tight text-primary">
           Track your grievance
         </h1>
-        <p className="mt-2 text-sm text-muted">
+        <p className="mt-2 text-sm text-primary/70">
           Enter your grievance reference ID to see the current status.
           No login required.
         </p>
@@ -86,13 +86,13 @@ export default function TrackPage() {
       {grievance && (
         <div className="card animate-fade-up mt-6 overflow-hidden">
           <div className="border-b border-line px-6 py-4 bg-gradient-to-r from-primary/5 to-teal-accent/5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">
               Ref #{grievance.id.slice(0, 8).toUpperCase()}
             </p>
             <h2 className="mt-1 text-lg font-black text-ink">
               {grievance.title}
             </h2>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-xs text-primary/70">
               {new Date(grievance.createdAt).toLocaleString("en-IN", {
                 day: "numeric",
                 month: "short",
@@ -111,7 +111,7 @@ export default function TrackPage() {
             </div>
 
             <div>
-              <h3 className="text-xs font-bold uppercase tracking-wide text-muted">
+              <h3 className="text-xs font-bold uppercase tracking-wide text-primary/70">
                 Status timeline
               </h3>
               <div className="mt-3">
@@ -121,11 +121,11 @@ export default function TrackPage() {
 
             <div className="grid grid-cols-2 gap-3 text-sm">
               <div className="rounded-xl bg-canvas p-3">
-                <p className="text-xs text-muted">Location</p>
-                <p className="font-semibold text-ink">📍 {grievance.location}</p>
+                <p className="text-xs text-primary/70">Location</p>
+                <p className="font-semibold text-primary">📍 {grievance.location}</p>
               </div>
               <div className="rounded-xl bg-canvas p-3">
-                <p className="text-xs text-muted">Routed to</p>
+                <p className="text-xs text-primary/70">Routed to</p>
                 <p className="font-semibold text-ink">
                   {DEPARTMENTS[grievance.category]}
                 </p>
@@ -137,7 +137,7 @@ export default function TrackPage() {
                 <p className="text-xs font-bold uppercase tracking-wide text-teal-accent">
                   ✦ Summary
                 </p>
-                <p className="mt-1.5 text-sm italic leading-relaxed text-ink">
+                <p className="mt-1.5 text-sm italic leading-relaxed text-primary">
                   &ldquo;{grievance.aiSummary}&rdquo;
                 </p>
               </div>

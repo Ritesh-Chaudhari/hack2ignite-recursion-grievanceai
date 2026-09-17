@@ -50,7 +50,7 @@ function ChartCard({
       style={{ animationDelay: `${delay * 1000}ms` }}
     >
       <h3 className="text-sm font-bold text-ink">{title}</h3>
-      <p className="mb-3 text-xs text-muted">{subtitle}</p>
+      <p className="mb-3 text-xs text-primary/70">{subtitle}</p>
       <div className="h-56">{children}</div>
     </div>
   );
@@ -164,7 +164,7 @@ export const Analytics = memo(function Analytics({
             <Tooltip contentStyle={{ borderRadius: 12, border: "1px solid #d1d5e0", fontSize: 12 }} />
           </PieChart>
         </ResponsiveContainer>
-        <div className="mt-1 flex flex-wrap justify-center gap-3 text-xs font-medium text-muted">
+        <div className="mt-1 flex flex-wrap justify-center gap-3 text-xs font-medium text-primary/70">
           {byPriority.map((p) => (
             <span key={p.name} className="inline-flex items-center gap-1.5">
               <span

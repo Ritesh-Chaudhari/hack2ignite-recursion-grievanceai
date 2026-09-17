@@ -137,7 +137,7 @@ body {
 }
 
 .btn-ghost {
-  @apply border border-line bg-white text-ink shadow-sm hover:border-primary/40
+  @apply border border-line bg-white text-primary shadow-sm hover:border-primary/40
     hover:bg-primary-soft/60 hover:text-primary-dark;
 }
 
@@ -151,7 +151,7 @@ body {
 }
 
 .label {
-  @apply mb-1.5 block text-sm font-medium text-ink;
+  @apply mb-1.5 block text-sm font-medium text-primary;
 }
 
 .hero-grid {

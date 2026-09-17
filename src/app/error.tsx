@@ -20,13 +20,13 @@ export default function GlobalError({
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-danger-soft text-2xl">
           💥
         </div>
-        <h1 className="text-xl font-black text-ink">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="text-xl font-black text-primary">Something went wrong</h1>
+        <p className="mt-2 text-sm text-primary/70">
           An unexpected error occurred. Please try again or return to the
           homepage.
         </p>
         {error.digest && (
-          <p className="mt-2 text-xs text-muted/80">
+          <p className="mt-2 text-xs text-primary/70">
             Error ID: {error.digest}
           </p>
         )}

@@ -110,8 +110,8 @@ export default function AllGrievancesPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-warn-soft text-2xl">
             🛡️
           </div>
-          <h1 className="text-xl font-black text-ink">Officers only</h1>
-          <p className="mt-2 text-sm text-muted">
+          <h1 className="text-xl font-black text-primary">Officers only</h1>
+          <p className="mt-2 text-sm text-primary/70">
             This page requires an officer account.
           </p>
           <Link href="/login" className="btn btn-primary mt-6">Go to login</Link>
@@ -125,10 +125,10 @@ export default function AllGrievancesPage() {
       {/* Header */}
       <div className="animate-fade-up flex flex-wrap items-end justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-black tracking-tight text-ink">
+          <h1 className="text-3xl font-black tracking-tight text-primary">
             📋 All Grievances
           </h1>
-          <p className="mt-1.5 text-sm text-muted">
+          <p className="mt-1.5 text-sm text-primary/70">
             {filtered.length} grievance{filtered.length === 1 ? "" : "s"} found
           </p>
         </div>
@@ -153,7 +153,7 @@ export default function AllGrievancesPage() {
       {/* Filters */}
       <div className="card animate-fade-up mt-6 flex flex-wrap items-end gap-3 p-4">
         <div className="min-w-[200px] flex-1">
-          <label htmlFor="search" className="mb-1 block text-xs font-semibold text-muted">
+          <label htmlFor="search" className="mb-1 block text-xs font-semibold text-primary/70">
             Search title, location, summary
           </label>
           <input
@@ -172,7 +172,7 @@ export default function AllGrievancesPage() {
           ] as const
         ).map(({ key, options, label }) => (
           <div key={key} className="w-36">
-            <label htmlFor={`f-${key}`} className="mb-1 block text-xs font-semibold text-muted">
+            <label htmlFor={`f-${key}`} className="mb-1 block text-xs font-semibold text-primary/70">
               {label}
             </label>
             <select
@@ -189,7 +189,7 @@ export default function AllGrievancesPage() {
           </div>
         ))}
         <div className="w-36">
-          <label htmlFor="sort" className="mb-1 block text-xs font-semibold text-muted">
+          <label htmlFor="sort" className="mb-1 block text-xs font-semibold text-primary/70">
             Sort by
           </label>
           <select
@@ -226,8 +226,8 @@ export default function AllGrievancesPage() {
         ) : paginatedGrievances.length === 0 ? (
           <div className="card animate-pop p-12 text-center">
             <p className="text-2xl">🗂️</p>
-            <p className="mt-2 font-bold text-ink">No grievances match these filters</p>
-            <p className="mt-1 text-sm text-muted">
+            <p className="mt-2 font-bold text-primary">No grievances match these filters</p>
+            <p className="mt-1 text-sm text-primary/70">
               Adjust the filters to see results.
             </p>
           </div>
@@ -244,7 +244,7 @@ export default function AllGrievancesPage() {
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div className="min-w-0 flex-1">
                       <div className="flex items-center gap-2">
-                        <h2 className="truncate text-base font-bold text-ink">{g.title}</h2>
+                        <h2 className="truncate text-base font-bold text-primary">{g.title}</h2>
                         {g.duplicateOf && g.duplicateOf.length > 0 && (
                           <span
                             className="shrink-0 rounded-full bg-warn-soft px-2 py-0.5 text-[10px] font-bold text-warn"
@@ -254,10 +254,10 @@ export default function AllGrievancesPage() {
                           </span>
                         )}
                       </div>
-                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-muted">
+                      <p className="mt-1 line-clamp-2 text-sm leading-relaxed text-primary/70">
                         ✦ {g.aiSummary}
                       </p>
-                      <p className="mt-1.5 text-xs text-muted">
+                      <p className="mt-1.5 text-xs text-primary/70">
                         📍 {g.location} · {g.submitterName} ·{" "}
                         {new Date(g.createdAt).toLocaleDateString("en-IN", {
                           day: "numeric",
@@ -302,7 +302,7 @@ export default function AllGrievancesPage() {
                 >
                   ← Prev
                 </button>
-                <span className="text-sm text-muted">
+                <span className="text-sm text-primary/70">
                   Page {page + 1} of {totalPages}
                   <span className="ml-2 text-xs">({paginatedGrievances.length} results)</span>
                 </span>

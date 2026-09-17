@@ -48,10 +48,10 @@ export default function SignupPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
             👤
           </div>
-          <h1 className="text-2xl font-black tracking-tight text-ink">
+          <h1 className="text-2xl font-black tracking-tight text-primary">
             Join as a Citizen
           </h1>
-          <p className="mt-1 text-sm text-muted">
+          <p className="mt-1 text-sm text-primary/70">
             Create an account to report and track civic issues.
           </p>
         </div>
@@ -100,8 +100,8 @@ export default function SignupPage() {
             <div className="flex items-start gap-3">
               <span className="text-xl">👤</span>
               <div>
-                <span className="block text-sm font-bold text-ink">Citizen Account</span>
-                <span className="block mt-1 text-xs text-muted">
+                <span className="block text-sm font-bold text-primary">Citizen Account</span>
+                <span className="block mt-1 text-xs text-primary/70">
                   File grievances, track status, and help improve your city.
                 </span>
               </div>
@@ -119,7 +119,7 @@ export default function SignupPage() {
           </button>
         </form>
 
-        <p className="mt-4 text-center text-sm text-muted">
+        <p className="mt-4 text-center text-sm text-primary/70">
           Already registered?{" "}
           <Link href="/login" className="font-semibold text-primary hover:underline">
             Log in
@@ -132,8 +132,8 @@ export default function SignupPage() {
         <div className="flex items-start gap-3">
           <span className="text-xl">🛡️</span>
           <div>
-            <p className="text-sm font-bold text-ink">Are you an Officer?</p>
-            <p className="mt-1 text-xs text-muted">
+            <p className="text-sm font-bold text-primary">Are you an Officer?</p>
+            <p className="mt-1 text-xs text-primary/70">
               Officer accounts are provided by administrators.{" "}
               <Link href="/login" className="font-semibold text-primary hover:underline">
                 Use demo login

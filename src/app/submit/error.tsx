@@ -20,8 +20,8 @@ export default function SubmitError({
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-danger-soft text-2xl">
           ⚠️
         </div>
-        <h1 className="text-xl font-black text-ink">Submission Error</h1>
-        <p className="mt-2 text-sm text-muted">
+        <h1 className="text-xl font-black text-primary">Submission Error</h1>
+        <p className="mt-2 text-sm text-primary/70">
           The grievance submission form encountered an error. Please try again.
         </p>
         <div className="mt-6 flex gap-3">

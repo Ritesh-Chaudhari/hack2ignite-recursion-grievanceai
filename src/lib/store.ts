@@ -64,32 +64,59 @@ interface StoreModels {
   Grievance: Model<Grievance>;
 }
 
+interface MongooseCache {
+  conn: typeof mongoose | null;
+  promise: Promise<typeof mongoose> | null;
+}
+
 const globalStore = globalThis as unknown as {
+  __mongooseCache?: MongooseCache;
   __grievanceStore?: StoreModels;
   __grievanceLocal?: { users: UserRecord[]; grievances: Grievance[] };
 };
 
-async function getMongoModels(): Promise<StoreModels | null> {
-  const uri = process.env.MONGODB_URI;
-  if (!uri) return null;
-  if (globalStore.__grievanceStore) return globalStore.__grievanceStore;
-  try {
-    mongoose.connection.on("error", (err) =>
-      console.error("[store] MongoDB error:", err.message),
-    );
-    await mongoose.connect(uri, { dbName: "grievance_ai" });
+function getMongoCache(): MongooseCache {
+  if (!globalStore.__mongooseCache) {
+    globalStore.__mongooseCache = { conn: null, promise: null };
+  }
+  return globalStore.__mongooseCache;
+}
 
-    // Graceful shutdown: close the connection when the process exits.
-    const shutdown = async () => {
-      try {
-        await mongoose.disconnect();
-        console.log("[store] MongoDB connection closed.");
-      } catch {
-        // Ignore errors during shutdown
-      }
-    };
-    process.on("SIGINT", shutdown);
-    process.on("SIGTERM", shutdown);
+function getMongoUri(): string | undefined {
+  let uri = process.env.MONGODB_URI || process.env.MONGODB_URL;
+  if (!uri) return undefined;
+  uri = uri.trim();
+  if ((uri.startsWith('"') && uri.endsWith('"')) || (uri.startsWith("'") && uri.endsWith("'"))) {
+    uri = uri.slice(1, -1).trim();
+  }
+  return uri;
+}
+
+async function getMongoModels(): Promise<StoreModels | null> {
+  const uri = getMongoUri();
+  if (!uri) {
+    if (process.env.NODE_ENV === "production") {
+      console.warn(
+        "[store] MONGODB_URI is not set in production. Local file persistence is not supported in serverless environments.",
+      );
+    }
+    return null;
+  }
+
+  if (globalStore.__grievanceStore && mongoose.connection.readyState === 1) {
+    return globalStore.__grievanceStore;
+  }
+
+  const cache = getMongoCache();
+
+  try {
+    if (!cache.promise || mongoose.connection.readyState === 0) {
+      cache.promise = mongoose.connect(uri, {
+        dbName: "grievance_ai",
+        bufferCommands: false,
+      });
+    }
+    cache.conn = await cache.promise;
 
     const User =
       (mongoose.models.User as Model<UserRecord>) ||
@@ -100,10 +127,15 @@ async function getMongoModels(): Promise<StoreModels | null> {
     globalStore.__grievanceStore = { User, Grievance };
     return globalStore.__grievanceStore;
   } catch (err) {
-    console.warn(
-      "[store] MongoDB connection failed, using local file fallback:",
-      err instanceof Error ? err.message : err,
-    );
+    cache.promise = null;
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    console.error("[store] MongoDB connection error:", errorMsg);
+
+    if (process.env.NODE_ENV === "production") {
+      throw new Error(
+        `Database connection failed in production. Please check your MONGODB_URI environment variable and ensure MongoDB Atlas Network Access allows 0.0.0.0/0. Details: ${errorMsg}`,
+      );
+    }
     return null;
   }
 }
@@ -128,6 +160,11 @@ async function writeLocal(data: {
   users: UserRecord[];
   grievances: Grievance[];
 }): Promise<void> {
+  if (process.env.NODE_ENV === "production") {
+    throw new Error(
+      "Cannot write to local JSON file in production serverless environment (Vercel). Please set MONGODB_URI in your Vercel Environment Variables.",
+    );
+  }
   await mkdir(DATA_DIR, { recursive: true });
   await writeFile(DATA_FILE, JSON.stringify(data, null, 2), "utf8");
 }

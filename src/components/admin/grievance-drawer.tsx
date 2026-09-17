@@ -109,13 +109,13 @@ export function GrievanceDrawer({
         {/* Header */}
         <div className="flex items-start justify-between gap-4 border-b border-line px-6 py-5">
           <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+            <p className="text-xs font-semibold uppercase tracking-wide text-primary/70">
               Ref #{grievance.id.slice(0, 8).toUpperCase()}
             </p>
             <h2 className="mt-0.5 text-lg font-black leading-snug text-ink">
               {grievance.title}
             </h2>
-            <p className="mt-1 text-xs text-muted">
+            <p className="mt-1 text-xs text-primary/70">
               {formatDate(grievance.createdAt)} · by {grievance.submitterName}
             </p>
           </div>
@@ -147,7 +147,7 @@ export function GrievanceDrawer({
           </div>
 
           <div>
-            <h3 className="text-xs font-bold uppercase tracking-wide text-muted">
+            <h3 className="text-xs font-bold uppercase tracking-wide text-primary/70">
               Complaint
             </h3>
             <p className="mt-2 whitespace-pre-wrap text-sm leading-relaxed text-ink">
@@ -157,11 +157,11 @@ export function GrievanceDrawer({
 
           <div className="grid grid-cols-2 gap-3 text-sm">
             <div className="rounded-xl bg-canvas p-3">
-              <p className="text-xs text-muted">Location</p>
+              <p className="text-xs text-primary/70">Location</p>
               <p className="font-semibold text-ink">📍 {grievance.location}</p>
             </div>
             <div className="rounded-xl bg-canvas p-3">
-              <p className="text-xs text-muted">Routed to</p>
+              <p className="text-xs text-primary/70">Routed to</p>
               <p className="font-semibold text-ink">{DEPARTMENTS[grievance.category]}</p>
             </div>
           </div>
@@ -175,7 +175,7 @@ export function GrievanceDrawer({
                 {duplicates.map((d) => (
                   <li key={d.id} className="text-sm text-ink">
                     <span className="font-semibold">{d.title}</span>
-                    <span className="text-muted"> — {d.location} · {d.status}</span>
+                    <span className="text-primary/70"> — {d.location} · {d.status}</span>
                   </li>
                 ))}
               </ul>

@@ -70,7 +70,7 @@ export function Navbar() {
             <>
               <div className="text-right">
                 <p className="text-sm font-semibold leading-4 text-ink">{user.name}</p>
-                <p className="text-xs capitalize leading-4 text-muted">
+                <p className="text-xs capitalize leading-4 text-primary/70">
                   {user.role === "admin" ? "🛡️ Officer" : "👤 Citizen"}
                 </p>
               </div>
@@ -126,7 +126,7 @@ export function Navbar() {
                 <div className="space-y-2">
                   <div className="px-3 py-2">
                     <p className="text-sm font-semibold text-ink">{user.name}</p>
-                    <p className="text-xs capitalize text-muted">
+                    <p className="text-xs capitalize text-primary/70">
                       {user.role === "admin" ? "🛡️ Officer" : "👤 Citizen"}
                     </p>
                   </div>

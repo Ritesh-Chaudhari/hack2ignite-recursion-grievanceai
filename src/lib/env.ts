@@ -12,9 +12,10 @@ interface EnvCheck {
 }
 
 export function validateEnv(): EnvCheck[] {
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
   const checks: EnvCheck[] = [
     { name: "GEMINI_API_KEY", required: false, present: !!process.env.GEMINI_API_KEY },
-    { name: "MONGODB_URI", required: false, present: !!process.env.MONGODB_URI },
+    { name: "MONGODB_URI", required: process.env.NODE_ENV === "production", present: !!mongoUri },
     { name: "AUTH_SECRET", required: process.env.NODE_ENV === "production", present: !!process.env.AUTH_SECRET },
     { name: "GEMINI_MODEL", required: false, present: !!process.env.GEMINI_MODEL },
   ];
@@ -43,9 +44,10 @@ export function getEnvSummary(): {
   authSecret: "configured" | "using dev default";
   mode: string;
 } {
+  const mongoUri = process.env.MONGODB_URI || process.env.MONGODB_URL;
   return {
     gemini: process.env.GEMINI_API_KEY ? "configured" : "not configured",
-    mongodb: process.env.MONGODB_URI ? "configured" : "not configured",
+    mongodb: mongoUri ? "configured" : "not configured",
     authSecret: process.env.AUTH_SECRET ? "configured" : "using dev default",
     mode: process.env.NODE_ENV ?? "development",
   };
