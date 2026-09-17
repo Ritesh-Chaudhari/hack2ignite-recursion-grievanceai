@@ -17,10 +17,7 @@ const ADMIN_LINKS: Array<{ href: string; label: string; icon: string }> = [
   { href: "/admin/grievances", label: "All Grievances", icon: "📋" },
 ];
 
-const PUBLIC_LINKS: Array<{ href: string; label: string; icon: string }> = [
-  { href: "/submit", label: "Submit Grievance", icon: "📝" },
-  { href: "/track", label: "Track Status", icon: "🔍" },
-];
+const PUBLIC_LINKS: Array<{ href: string; label: string; icon: string }> = [];
 
 export function Navbar() {
   const { user, loading, logout } = useAuth();
@@ -28,6 +25,7 @@ export function Navbar() {
   const [menuOpen, setMenuOpen] = useState(false);
 
   // Determine which links to show based on user role
+  // No nav links for logged-out users — they should sign up/log in first
   const navLinks = user?.role === "admin" ? ADMIN_LINKS : user ? CITIZEN_LINKS : PUBLIC_LINKS;
 
   return (
