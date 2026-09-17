@@ -81,9 +81,6 @@ export default function LandingPage() {
             <Link href="/submit" className="btn btn-primary px-8 py-3 text-base">
               Submit a grievance →
             </Link>
-            <Link href="/track" className="btn !border-white/30 !bg-white/10 !text-white backdrop-blur-sm hover:!bg-white/20 px-8 py-3 text-base">
-              Track your grievance
-            </Link>
           </div>
           <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
             <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
