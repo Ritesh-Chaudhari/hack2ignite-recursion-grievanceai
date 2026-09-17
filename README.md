@@ -81,7 +81,7 @@ npm start
 | Variable | Required | Description |
 |---|---|---|
 | `GEMINI_API_KEY` | Yes (for AI) | Google Gemini API key. Without it, submissions use heuristic triage. |
-| `MONGODB_URI` | No | MongoDB connection string (`mongodb://localhost:27017` or Atlas). Omit to use the local JSON fallback store. |
+| `MONGODB_URI` | Yes | MongoDB connection string (`mongodb://localhost:27017` or Atlas). Omit to use the local JSON fallback store. |
 | `AUTH_SECRET` | No | JWT signing secret for session cookies (has a dev-only default — set a strong value in production). |
 | `GEMINI_MODEL` | No | Gemini model override (default: `gemini-2.5-flash`). |
 
