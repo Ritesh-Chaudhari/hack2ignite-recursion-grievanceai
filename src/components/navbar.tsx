@@ -36,7 +36,7 @@ export function Navbar() {
           <span className="flex h-9 w-9 items-center justify-center rounded-xl bg-primary text-lg font-black text-white shadow-md shadow-primary/30">
             ग
           </span>
-          <span className="text-lg font-bold tracking-tight text-ink">
+          <span className="text-lg font-bold tracking-tight text-black">
             Grievance<span className="text-primary">AI</span>
           </span>
         </Link>
@@ -49,10 +49,10 @@ export function Navbar() {
               <Link
                 key={link.href}
                 href={link.href}
-                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-medium transition-colors duration-200 ${
+                className={`flex items-center gap-1.5 rounded-lg px-3.5 py-2 text-sm font-semibold transition-colors duration-200 ${
                   active
-                    ? "bg-primary-soft text-primary-dark"
-                    : "text-muted hover:bg-canvas hover:text-ink"
+                    ? "bg-primary text-white shadow-sm"
+                    : "text-slate-700 hover:bg-slate-100 hover:text-black"
                 }`}
               >
                 <span className="text-base">{link.icon}</span>
@@ -69,18 +69,18 @@ export function Navbar() {
           ) : user ? (
             <>
               <div className="text-right">
-                <p className="text-sm font-semibold leading-4 text-ink">{user.name}</p>
-                <p className="text-xs capitalize leading-4 text-muted font-medium">
+                <p className="text-sm font-bold leading-4 text-slate-900">{user.name}</p>
+                <p className="text-xs capitalize leading-4 font-semibold text-slate-600">
                   {user.role === "admin" ? "🛡️ Officer" : "👤 Citizen"}
                 </p>
               </div>
-              <button onClick={() => void logout()} className="btn btn-ghost !px-4 !py-2">
+              <button onClick={() => void logout()} className="btn btn-ghost !text-slate-800 hover:!text-black !px-4 !py-2">
                 Log out
               </button>
             </>
           ) : (
             <>
-              <Link href="/login" className="btn btn-ghost !px-4 !py-2">
+              <Link href="/login" className="btn btn-ghost !text-slate-800 hover:!text-black !px-4 !py-2">
                 Log in
               </Link>
               <Link href="/signup" className="btn btn-primary !px-4 !py-2">
@@ -115,7 +115,7 @@ export function Navbar() {
                 key={link.href}
                 href={link.href}
                 onClick={() => setMenuOpen(false)}
-                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-medium text-ink hover:bg-canvas"
+                className="flex items-center gap-2 rounded-lg px-3 py-2.5 text-sm font-semibold text-slate-800 hover:bg-slate-100 hover:text-black"
               >
                 <span>{link.icon}</span>
                 {link.label}
@@ -125,8 +125,8 @@ export function Navbar() {
               {user ? (
                 <div className="space-y-2">
                   <div className="px-3 py-2">
-                    <p className="text-sm font-semibold text-ink">{user.name}</p>
-                    <p className="text-xs capitalize text-muted font-medium">
+                    <p className="text-sm font-bold text-slate-900">{user.name}</p>
+                    <p className="text-xs capitalize font-semibold text-slate-600">
                       {user.role === "admin" ? "🛡️ Officer" : "👤 Citizen"}
                     </p>
                   </div>
@@ -135,14 +135,14 @@ export function Navbar() {
                       setMenuOpen(false);
                       void logout();
                     }}
-                    className="btn btn-ghost w-full"
+                    className="btn btn-ghost !text-slate-800 hover:!text-black w-full"
                   >
                     Log out
                   </button>
                 </div>
               ) : (
                 <div className="flex gap-2">
-                  <Link href="/login" className="btn btn-ghost flex-1" onClick={() => setMenuOpen(false)}>
+                  <Link href="/login" className="btn btn-ghost !text-slate-800 hover:!text-black flex-1" onClick={() => setMenuOpen(false)}>
                     Log in
                   </Link>
                   <Link href="/signup" className="btn btn-primary flex-1" onClick={() => setMenuOpen(false)}>

@@ -162,46 +162,6 @@ body {
   mask-image: radial-gradient(ellipse 80% 60% at 50% 0%, black 30%, transparent 75%);
 }
 
-/*
- * Dark mode — respects system preference via prefers-color-scheme.
- * Tokens are remapped so every utility class works in both themes.
- */
-@media (prefers-color-scheme: dark) {
-  @theme {
-    --color-canvas: #0b1220;
-    --color-surface: #131c31;
-    --color-ink: #e2e8f0;
-    --color-muted: #94a3b8;
-    --color-line: #1e293b;
-
-    --color-primary-soft: #1e1b4b;
-  }
-
-  body {
-    @apply bg-canvas text-ink;
-  }
-
-  .card {
-    @apply border-line bg-surface;
-    box-shadow: 0 1px 2px rgba(0,0,0,0.3), 0 8px 24px -12px rgba(0,0,0,0.5);
-  }
-
-  .field {
-    @apply border-line bg-surface text-ink;
-  }
-
-  .btn-ghost {
-    @apply border-line bg-surface text-ink;
-  }
-
-  .hero-grid {
-    background-image:
-      linear-gradient(rgba(79, 70, 229, 0.12) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(79, 70, 229, 0.12) 1px, transparent 1px);
-    background-size: 44px 44px;
-  }
-}
-
 /* Skip-to-content link for accessibility */
 .skip-to-content {
   @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100]
