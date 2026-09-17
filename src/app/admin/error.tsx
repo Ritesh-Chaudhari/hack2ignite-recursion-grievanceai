@@ -20,8 +20,8 @@ export default function AdminError({
         <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-danger-soft text-2xl">
           🛡️
         </div>
-        <h1 className="text-xl font-black text-primary">Dashboard Error</h1>
-        <p className="mt-2 text-sm text-primary/70">
+        <h1 className="text-xl font-black text-ink">Dashboard Error</h1>
+        <p className="mt-2 text-sm text-muted">
           The admin dashboard encountered an error. Please try refreshing.
         </p>
         <div className="mt-6 flex gap-3">

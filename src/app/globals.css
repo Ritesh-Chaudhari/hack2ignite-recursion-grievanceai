@@ -151,7 +151,7 @@ body {
 }
 
 .label {
-  @apply mb-1.5 block text-sm font-medium text-primary;
+  @apply mb-1.5 block text-sm font-semibold text-ink;
 }
 
 .hero-grid {

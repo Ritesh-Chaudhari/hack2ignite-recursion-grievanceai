@@ -137,8 +137,8 @@ export default function SubmitPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
             🔐
           </div>
-          <h1 className="text-xl font-black text-primary">Log in to file a grievance</h1>
-          <p className="mt-2 text-sm text-primary/70">
+          <h1 className="text-xl font-black text-ink">Log in to file a grievance</h1>
+          <p className="mt-2 text-sm text-muted">
             Create a free account so you can track your complaint to resolution.
           </p>
           <div className="mt-6 flex gap-3">
@@ -158,8 +158,8 @@ export default function SubmitPage() {
           <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-warn-soft text-2xl">
             🛡️
           </div>
-          <h1 className="text-xl font-black text-primary">Officers cannot file grievances</h1>
-          <p className="mt-2 text-sm text-primary/70">
+          <h1 className="text-xl font-black text-ink">Officers cannot file grievances</h1>
+          <p className="mt-2 text-sm text-muted">
             As an officer, you can view and manage grievances from the dashboard.
           </p>
           <Link href="/admin" className="btn btn-primary mt-6">Go to Dashboard</Link>
@@ -183,30 +183,30 @@ export default function SubmitPage() {
               ✓
             </div>
             <h1 className="mt-4 text-2xl font-black">Grievance received</h1>
-            <p className="mt-1 text-sm text-white/80">
+            <p className="mt-1 text-sm text-white/90">
               Reference #{g.id.slice(0, 8).toUpperCase()}
             </p>
           </div>
 
           <div className="space-y-5 px-8 py-7">
-            <p className="text-center text-base font-medium text-primary">
+            <p className="text-center text-base font-medium text-ink">
               Your complaint has been received and classified as{" "}
               <CategoryBadge category={g.category} /> with priority{" "}
               <PriorityBadge priority={g.priority} />. It has been routed to the{" "}
-              <span className="font-bold text-primary-dark">{dept}</span>.
+              <span className="font-bold text-primary">{dept}</span>.
             </p>
 
             <div className="rounded-xl border border-teal-accent/25 bg-teal-soft/40 p-4">
               <p className="text-xs font-bold uppercase tracking-wide text-teal-accent">
                 ✦ AI summary for officers
               </p>
-              <p className="mt-1.5 text-sm italic leading-relaxed text-primary">
+              <p className="mt-1.5 text-sm italic leading-relaxed text-ink">
                 &ldquo;{g.aiSummary}&rdquo;
               </p>
               <div className="mt-3 flex flex-wrap items-center gap-2">
                 <LanguageBadge language={g.language} />
-                <span className="text-xs text-primary/70">
-                  Detected language: <strong>{g.language}</strong>
+                <span className="text-xs text-muted">
+                  Detected language: <strong className="text-ink">{g.language}</strong>
                   {!g.aiProcessed && " (heuristic — AI unavailable)"}
                 </span>
               </div>
@@ -220,13 +220,13 @@ export default function SubmitPage() {
                 </p>
                 <ul className="mt-2 space-y-1.5">
                   {result.similar.map((s) => (
-                    <li key={s.id} className="text-sm text-primary">
+                    <li key={s.id} className="text-sm text-ink">
                       <span className="font-semibold">{s.title}</span>
-                      <span className="text-primary/70"> — {s.location}</span>
+                      <span className="text-muted"> — {s.location}</span>
                     </li>
                   ))}
                 </ul>
-                <p className="mt-2 text-xs text-primary/70">
+                <p className="mt-2 text-xs text-muted">
                   Clustered complaints help the department act faster on shared problems.
                 </p>
               </div>
@@ -253,10 +253,10 @@ export default function SubmitPage() {
   return (
     <div className="mx-auto max-w-2xl px-4 py-12">
       <div className="animate-fade-up">
-        <h1 className="text-3xl font-black tracking-tight text-primary">
+        <h1 className="text-3xl font-black tracking-tight text-ink">
           File a grievance
         </h1>
-        <p className="mt-1.5 text-sm text-primary/70">
+        <p className="mt-1.5 text-sm text-muted">
           Tell us what&rsquo;s wrong. Write in any language — AI will understand and route it to the right department.
         </p>
       </div>
@@ -267,8 +267,8 @@ export default function SubmitPage() {
           <div className="flex items-start gap-3">
             <span className="text-xl">🌐</span>
             <div>
-              <p className="text-sm font-semibold text-primary">Write in any language</p>
-              <p className="mt-1 text-xs text-primary/70">
+              <p className="text-sm font-semibold text-ink">Write in any language</p>
+              <p className="mt-1 text-xs text-muted">
                 Hindi, Marathi, English, or any other language — our AI will automatically detect and understand your complaint.
               </p>
             </div>
@@ -298,7 +298,7 @@ export default function SubmitPage() {
         <div>
           <label htmlFor="description" className="label">
             Description
-            <span className="ml-2 text-xs font-normal text-primary/70">
+            <span className="ml-2 text-xs font-normal text-muted">
               {form.description.trim().length}/20 min — write freely in any language
             </span>
           </label>
@@ -339,7 +339,7 @@ export default function SubmitPage() {
           </div>
           <div>
             <label htmlFor="category" className="label">
-              Category <span className="text-xs font-normal text-primary/70">(AI may correct this)</span>
+              Category <span className="text-xs font-normal text-muted">(AI may correct this)</span>
             </label>
             <select
               id="category"
@@ -375,8 +375,8 @@ export default function SubmitPage() {
                 <span className="absolute inset-0 animate-pulse-ring rounded-2xl" />
               </span>
               <div>
-                <p className="text-sm font-black text-primary">Gemini is triaging your grievance</p>
-                <p className="text-xs text-primary/70">Usually takes a few seconds</p>
+                <p className="text-sm font-black text-ink">Gemini is triaging your grievance</p>
+                <p className="text-xs text-muted">Usually takes a few seconds</p>
               </div>
             </div>
 
@@ -392,7 +392,7 @@ export default function SubmitPage() {
                 <li
                   key={s}
                   className={`flex items-center gap-2 text-sm transition-colors duration-300 ${
-                    i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted/70"
+                    i < stage ? "text-ok" : i === stage ? "text-ink" : "text-muted"
                   }`}
                 >
                   <span
