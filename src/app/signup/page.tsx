@@ -1,12 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 
 export default function SignupPage() {
-  const { signup } = useAuth();
+  const { user, signup, loading } = useAuth();
   const router = useRouter();
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
@@ -15,19 +15,30 @@ export default function SignupPage() {
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
 
+  // Redirect immediately once user is set after signup
+  useEffect(() => {
+    if (!loading && user) {
+      router.push("/my-grievances");
+    }
+  }, [user, loading, router]);
+
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
     setError(null);
     setBusy(true);
     try {
       await signup(name, email, password, role);
-      router.push("/my-grievances");
-      router.refresh();
+      // Redirect is handled by the useEffect above
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
     } finally {
       setBusy(false);
     }
+  }
+
+  // Don't show signup form if already logged in
+  if (!loading && user) {
+    return null;
   }
 
   return (

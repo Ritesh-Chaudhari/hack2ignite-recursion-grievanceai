@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
@@ -11,12 +11,19 @@ const DEMO_ACCOUNTS = [
 ];
 
 export default function LoginPage() {
-  const { login } = useAuth();
+  const { user, login, loading } = useAuth();
   const router = useRouter();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+
+  // Redirect immediately once user is set after login
+  useEffect(() => {
+    if (!loading && user) {
+      router.push(user.role === "admin" ? "/admin" : "/my-grievances");
+    }
+  }, [user, loading, router]);
 
   async function handleSubmit(e: React.FormEvent) {
     e.preventDefault();
@@ -24,16 +31,17 @@ export default function LoginPage() {
     setBusy(true);
     try {
       await login(email, password);
-      const res = await fetch("/api/auth/me", { cache: "no-store" });
-      const data = (await res.json()) as { user?: { role: string } | null };
-      // Citizens go to my-grievances, officers go to admin dashboard
-      router.push(data.user?.role === "admin" ? "/admin" : "/my-grievances");
-      router.refresh();
+      // Redirect is handled by the useEffect above
     } catch (err) {
       setError(err instanceof Error ? err.message : "Login failed.");
     } finally {
       setBusy(false);
     }
+  }
+
+  // Don't show login form if already logged in
+  if (!loading && user) {
+    return null;
   }
 
   return (
@@ -114,9 +122,7 @@ export default function LoginPage() {
                     // Ensure demo accounts exist (idempotent), then log in.
                     await fetch("/api/demo-accounts", { method: "POST" });
                     await login(acct.email, acct.password);
-                    const role = acct.email.startsWith("officer") ? "admin" : "citizen";
-                    router.push(role === "admin" ? "/admin" : "/my-grievances");
-                    router.refresh();
+                    // Redirect is handled by the useEffect above
                   } catch (err) {
                     setError(err instanceof Error ? err.message : "Login failed.");
                   } finally {
