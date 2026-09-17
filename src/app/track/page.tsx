@@ -45,6 +45,9 @@ export default function TrackPage() {
   return (
     <div className="mx-auto max-w-xl px-4 py-12">
       <div className="animate-fade-up text-center">
+        <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
+          🔍
+        </div>
         <h1 className="text-3xl font-black tracking-tight text-ink">
           Track your grievance
         </h1>
@@ -82,7 +85,7 @@ export default function TrackPage() {
 
       {grievance && (
         <div className="card animate-fade-up mt-6 overflow-hidden">
-          <div className="border-b border-line px-6 py-4">
+          <div className="border-b border-line px-6 py-4 bg-gradient-to-r from-primary/5 to-teal-accent/5">
             <p className="text-xs font-semibold uppercase tracking-wide text-muted">
               Ref #{grievance.id.slice(0, 8).toUpperCase()}
             </p>

@@ -21,7 +21,7 @@ export default function SignupPage() {
     setBusy(true);
     try {
       await signup(name, email, password, role);
-      router.push(role === "admin" ? "/admin" : "/my-grievances");
+      router.push("/my-grievances");
       router.refresh();
     } catch (err) {
       setError(err instanceof Error ? err.message : "Signup failed.");
@@ -33,12 +33,17 @@ export default function SignupPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
       <div className="animate-fade-up card p-8">
-        <h1 className="text-2xl font-black tracking-tight text-ink">
-          Create your account
-        </h1>
-        <p className="mt-1 text-sm text-muted">
-          Join GrievanceAI as a citizen or an officer.
-        </p>
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
+            👤
+          </div>
+          <h1 className="text-2xl font-black tracking-tight text-ink">
+            Join as a Citizen
+          </h1>
+          <p className="mt-1 text-sm text-muted">
+            Create an account to report and track civic issues.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
@@ -80,10 +85,16 @@ export default function SignupPage() {
             />
           </div>
 
-          <div className="rounded-xl border border-line bg-canvas p-4">
-            <span className="block text-sm font-bold text-ink">Citizen account</span>
-            <span className="block text-xs text-muted">Report & track issues in your city</span>
-            <p className="mt-2 text-xs text-muted">Need an officer account? <a href="/login" className="font-semibold text-primary hover:underline">Use a demo officer login</a></p>
+          <div className="rounded-xl border border-teal-accent/25 bg-teal-soft/50 p-4">
+            <div className="flex items-start gap-3">
+              <span className="text-xl">👤</span>
+              <div>
+                <span className="block text-sm font-bold text-ink">Citizen Account</span>
+                <span className="block mt-1 text-xs text-muted">
+                  File grievances, track status, and help improve your city.
+                </span>
+              </div>
+            </div>
           </div>
 
           {error && (
@@ -93,7 +104,7 @@ export default function SignupPage() {
           )}
 
           <button type="submit" disabled={busy} className="btn btn-primary w-full">
-            {busy ? "Creating account…" : "Create account"}
+            {busy ? "Creating account…" : "Create citizen account"}
           </button>
         </form>
 
@@ -103,6 +114,22 @@ export default function SignupPage() {
             Log in
           </Link>
         </p>
+      </div>
+
+      {/* Info card for officers */}
+      <div className="animate-fade-up mt-5 card p-5" style={{ animationDelay: "80ms" }}>
+        <div className="flex items-start gap-3">
+          <span className="text-xl">🛡️</span>
+          <div>
+            <p className="text-sm font-bold text-ink">Are you an Officer?</p>
+            <p className="mt-1 text-xs text-muted">
+              Officer accounts are provided by administrators.{" "}
+              <Link href="/login" className="font-semibold text-primary hover:underline">
+                Use demo login
+              </Link>
+            </p>
+          </div>
+        </div>
       </div>
     </div>
   );

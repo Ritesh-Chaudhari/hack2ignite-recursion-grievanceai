@@ -207,3 +207,23 @@ body {
   @apply sr-only focus:not-sr-only focus:fixed focus:top-2 focus:left-2 focus:z-[100]
     focus:rounded-lg focus:bg-primary focus:px-4 focus:py-2 focus:text-sm focus:font-bold focus:text-white;
 }
+
+/* Dark background sections — ensure white text for contrast */
+.bg-navy, .bg-navy\/50, .bg-navy\/70 {
+  @apply text-white;
+}
+
+/* Hero gradient section */
+.hero-section {
+  @apply text-white;
+}
+
+/* Confirmation card header (dark gradient) */
+.gradient-header {
+  @apply text-white;
+}
+
+/* AI processing overlay text fix */
+.ai-overlay {
+  @apply text-white;
+}

@@ -1,11 +1,11 @@
 import Link from "next/link";
-import { CATEGORIES, LANGUAGES } from "@/lib/constants";
+import { CATEGORIES } from "@/lib/constants";
 
 const FEATURES = [
   {
     icon: "🌐",
-    title: "Multilingual submissions",
-    body: "File complaints in English, Hindi, or Marathi. AI detects the language automatically — no extra effort from citizens.",
+    title: "Write in any language",
+    body: "File complaints in Hindi, Marathi, English, or any other language. AI understands them all automatically.",
   },
   {
     icon: "🧠",
@@ -38,7 +38,7 @@ const STEPS = [
   {
     step: "1",
     title: "Submit in your language",
-    body: "Describe the issue with a location. Hindi or Marathi works just as well as English.",
+    body: "Describe the issue with a location. Any language works — AI handles translation.",
   },
   {
     step: "2",
@@ -56,24 +56,24 @@ export default function LandingPage() {
   return (
     <div>
       {/* Hero */}
-      <section className="hero-grid relative overflow-hidden">
+      <section className="relative overflow-hidden bg-gradient-to-br from-navy via-navy-soft to-primary/90">
         <div
           aria-hidden
-          className="pointer-events-none absolute -top-24 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-primary/20 blur-3xl"
+          className="pointer-events-none absolute -top-24 left-1/2 h-96 w-[42rem] -translate-x-1/2 rounded-full bg-teal-accent/20 blur-3xl"
         />
         <div className="relative mx-auto max-w-5xl px-4 pb-24 pt-20 text-center sm:px-6">
-          <span className="animate-fade-in inline-flex items-center gap-2 rounded-full border border-primary/20 bg-primary-soft px-4 py-1.5 text-xs font-semibold text-primary-dark">
+          <span className="animate-fade-in inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-xs font-semibold text-white backdrop-blur-sm">
             <span className="h-1.5 w-1.5 rounded-full bg-teal-accent" />
             Hack 2 Ignite · Problem AI-04 · Team Recursion
           </span>
-          <h1 className="animate-fade-up mt-6 text-balance text-4xl font-black leading-tight tracking-tight text-ink sm:text-6xl">
+          <h1 className="animate-fade-up mt-6 text-balance text-4xl font-black leading-tight tracking-tight text-white sm:text-6xl">
             Your city&rsquo;s voice,{" "}
-            <span className="bg-gradient-to-r from-primary to-teal-accent bg-clip-text text-transparent">
+            <span className="bg-gradient-to-r from-teal-accent to-white bg-clip-text text-transparent">
               heard by AI
             </span>
           </h1>
-          <p className="animate-fade-up mx-auto mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-muted">
-            GrievanceAI registers public complaints in English, Hindi or Marathi,
+          <p className="animate-fade-up mx-auto mt-5 max-w-2xl text-pretty text-lg leading-relaxed text-white/80">
+            GrievanceAI registers public complaints in any language,
             classifies and prioritizes them with Gemini, routes them to the right
             department, and tracks every step to resolution.
           </p>
@@ -81,19 +81,20 @@ export default function LandingPage() {
             <Link href="/submit" className="btn btn-primary px-8 py-3 text-base">
               Submit a grievance →
             </Link>
-            <Link href="/admin" className="btn btn-ghost px-8 py-3 text-base">
-              Officer dashboard
+            <Link href="/track" className="btn !border-white/30 !bg-white/10 !text-white backdrop-blur-sm hover:!bg-white/20 px-8 py-3 text-base">
+              Track your grievance
             </Link>
           </div>
-          <div className="mt-8 flex flex-wrap items-center justify-center gap-2">
-            {LANGUAGES.map((lang) => (
-              <span
-                key={lang}
-                className="rounded-full border border-line bg-white px-3.5 py-1 text-sm font-medium text-muted shadow-sm"
-              >
-                {lang === "English" ? "English" : lang === "Hindi" ? "हिंदी" : "मराठी"}
-              </span>
-            ))}
+          <div className="mt-8 flex flex-wrap items-center justify-center gap-3">
+            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+              🌐 Any language supported
+            </span>
+            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+              🧠 Powered by Gemini AI
+            </span>
+            <span className="rounded-full border border-white/20 bg-white/10 px-4 py-1.5 text-sm font-medium text-white backdrop-blur-sm">
+              ⚡ Instant processing
+            </span>
           </div>
         </div>
       </section>
@@ -160,12 +161,83 @@ export default function LandingPage() {
             </span>
           ))}
         </div>
-        <Link
-          href="/signup"
-          className="btn btn-primary mt-10 px-8 py-3 text-base inline-flex"
-        >
-          Create your account
-        </Link>
+        <div className="mt-10 flex flex-col items-center justify-center gap-3 sm:flex-row">
+          <Link
+            href="/signup"
+            className="btn btn-primary px-8 py-3 text-base inline-flex"
+          >
+            Create your account
+          </Link>
+          <Link
+            href="/login"
+            className="btn btn-ghost px-8 py-3 text-base inline-flex"
+          >
+            Already registered? Log in
+          </Link>
+        </div>
+      </section>
+
+      {/* Role info section */}
+      <section className="border-y border-line bg-canvas py-16">
+        <div className="mx-auto max-w-5xl px-4 sm:px-6">
+          <h2 className="text-center text-2xl font-black tracking-tight text-ink">
+            How it works for everyone
+          </h2>
+          <div className="mt-10 grid gap-6 md:grid-cols-2">
+            {/* Citizen card */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-primary-soft text-2xl">
+                  👤
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-ink">For Citizens</h3>
+                  <p className="text-sm text-muted">Report & track issues</p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  File grievances in any language
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  Track status in real-time
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  See AI-generated summaries
+                </li>
+              </ul>
+            </div>
+            {/* Officer card */}
+            <div className="card p-6">
+              <div className="flex items-center gap-3">
+                <span className="flex h-12 w-12 items-center justify-center rounded-xl bg-teal-soft text-2xl">
+                  🛡️
+                </span>
+                <div>
+                  <h3 className="text-lg font-bold text-ink">For Officers</h3>
+                  <p className="text-sm text-muted">Investigate & resolve</p>
+                </div>
+              </div>
+              <ul className="mt-4 space-y-2 text-sm text-muted">
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  AI-prioritized grievance queue
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  Analytics & trend dashboards
+                </li>
+                <li className="flex items-start gap-2">
+                  <span className="text-primary">✓</span>
+                  Update status & track SLAs
+                </li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </section>
     </div>
   );

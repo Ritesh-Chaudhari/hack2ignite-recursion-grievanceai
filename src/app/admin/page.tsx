@@ -162,55 +162,58 @@ export default function AdminPage() {
 
   return (
     <div className="mx-auto max-w-7xl px-4 py-10 sm:px-6">
-      {/* Header */}
-      <div className="animate-fade-up flex flex-wrap items-end justify-between gap-4">
-        <div>
-          <h1 className="text-3xl font-black tracking-tight text-ink">
-            Officer dashboard
-          </h1>
-          <p className="mt-1.5 text-sm text-muted">
-            Welcome, {user.name} · AI-triaged grievances, Urgent first
-          </p>
-        </div>
-        <div className="flex gap-2">
-          <button onClick={() => void load()} className="btn btn-ghost">
-            ↻ Refresh
-          </button>
-          <button
-            onClick={() => {
-              const csv = grievancesToCsv(paginatedGrievances);
-              const ts = new Date().toISOString().slice(0, 10);
-              downloadCsv(csv, `grievances-${ts}.csv`);
-            }}
-            className="btn btn-ghost"
-            disabled={paginatedGrievances.length === 0}
-          >
-            ⬇ Export CSV
-          </button>
-          <button onClick={() => void seed()} className="btn btn-ghost" disabled={seedState === "seeding"}>
-            {seedState === "seeding"
-              ? "Seeding…"
-              : seedState === "done"
-                ? "✓ Demo data added"
-                : seedState === "skipped"
-                  ? "Data exists"
-                  : "Load demo data"}
-          </button>
+      {/* Header with dark background for contrast */}
+      <div className="animate-fade-up rounded-2xl bg-gradient-to-r from-navy to-primary-dark p-6 text-white">
+        <div className="flex flex-wrap items-end justify-between gap-4">
+          <div>
+            <h1 className="text-3xl font-black tracking-tight">
+              🛡️ Officer Dashboard
+            </h1>
+            <p className="mt-1.5 text-sm text-white/80">
+              Welcome, {user.name} · AI-triaged grievances, Urgent first
+            </p>
+          </div>
+          <div className="flex gap-2">
+            <button onClick={() => void load()} className="btn !border-white/30 !bg-white/10 !text-white backdrop-blur-sm hover:!bg-white/20">
+              ↻ Refresh
+            </button>
+            <button
+              onClick={() => {
+                const csv = grievancesToCsv(paginatedGrievances);
+                const ts = new Date().toISOString().slice(0, 10);
+                downloadCsv(csv, `grievances-${ts}.csv`);
+              }}
+              className="btn !border-white/30 !bg-white/10 !text-white backdrop-blur-sm hover:!bg-white/20"
+              disabled={paginatedGrievances.length === 0}
+            >
+              ⬇ Export CSV
+            </button>
+            <button onClick={() => void seed()} className="btn !border-white/30 !bg-white/10 !text-white backdrop-blur-sm hover:!bg-white/20" disabled={seedState === "seeding"}>
+              {seedState === "seeding"
+                ? "Seeding…"
+                : seedState === "done"
+                  ? "✓ Demo data added"
+                  : seedState === "skipped"
+                    ? "Data exists"
+                    : "Load demo data"}
+            </button>
+          </div>
         </div>
       </div>
 
-      {/* KPI cards — CSS animations instead of framer-motion */}
+      {/* KPI cards */}
       <div className="mt-6 grid grid-cols-2 gap-4 lg:grid-cols-5">
         {(
           [
-            { label: "Total grievances", value: stats.total, accent: "text-ink" },
-            { label: "Urgent", value: stats.urgent, accent: "text-danger" },
-            { label: "Open cases", value: stats.open, accent: "text-info" },
-            { label: "SLA breaches", value: stats.slaBreaches, accent: stats.slaBreaches > 0 ? "text-danger" : "text-ok" },
+            { label: "Total grievances", value: stats.total, accent: "text-ink", icon: "📝" },
+            { label: "Urgent", value: stats.urgent, accent: "text-danger", icon: "🚨" },
+            { label: "Open cases", value: stats.open, accent: "text-info", icon: "📂" },
+            { label: "SLA breaches", value: stats.slaBreaches, accent: stats.slaBreaches > 0 ? "text-danger" : "text-ok", icon: "⏱️" },
             {
               label: "Resolution rate",
               value: `${stats.resolutionRate}%`,
               accent: "text-ok",
+              icon: "✅",
             },
           ] as const
         ).map((kpi, i) => (
@@ -219,9 +222,12 @@ export default function AdminPage() {
             className="card card-hover animate-fade-up p-5"
             style={{ animationDelay: `${i * 60}ms` }}
           >
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              {kpi.label}
-            </p>
+            <div className="flex items-center justify-between">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                {kpi.label}
+              </p>
+              <span className="text-xl">{kpi.icon}</span>
+            </div>
             <p className={`mt-1 text-3xl font-black ${kpi.accent}`}>{kpi.value}</p>
           </div>
         ))}

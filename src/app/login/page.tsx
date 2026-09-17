@@ -6,8 +6,8 @@ import { useRouter } from "next/navigation";
 import { useAuth } from "@/components/auth-provider";
 
 const DEMO_ACCOUNTS = [
-  { label: "Demo Officer (Admin)", email: "officer@grievance.ai", password: "demo1234" },
-  { label: "Demo Citizen", email: "citizen@grievance.ai", password: "demo1234" },
+  { label: "Demo Officer (Admin)", email: "officer@grievance.ai", password: "demo1234", icon: "🛡️" },
+  { label: "Demo Citizen", email: "citizen@grievance.ai", password: "demo1234", icon: "👤" },
 ];
 
 export default function LoginPage() {
@@ -26,6 +26,7 @@ export default function LoginPage() {
       await login(email, password);
       const res = await fetch("/api/auth/me", { cache: "no-store" });
       const data = (await res.json()) as { user?: { role: string } | null };
+      // Citizens go to my-grievances, officers go to admin dashboard
       router.push(data.user?.role === "admin" ? "/admin" : "/my-grievances");
       router.refresh();
     } catch (err) {
@@ -38,10 +39,15 @@ export default function LoginPage() {
   return (
     <div className="mx-auto flex max-w-md flex-col px-4 py-16">
       <div className="animate-fade-up card p-8">
-        <h1 className="text-2xl font-black tracking-tight text-ink">Welcome back</h1>
-        <p className="mt-1 text-sm text-muted">
-          Log in to submit and track grievances.
-        </p>
+        <div className="text-center">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-primary-soft text-2xl">
+            🔐
+          </div>
+          <h1 className="text-2xl font-black tracking-tight text-ink">Welcome back</h1>
+          <p className="mt-1 text-sm text-muted">
+            Log in to submit and track grievances.
+          </p>
+        </div>
 
         <form onSubmit={handleSubmit} className="mt-6 space-y-4">
           <div>
@@ -120,7 +126,10 @@ export default function LoginPage() {
               }}
               className="btn btn-ghost w-full justify-between"
             >
-              <span>{acct.label}</span>
+              <span className="flex items-center gap-2">
+                <span>{acct.icon}</span>
+                {acct.label}
+              </span>
               <span className="text-xs text-muted">{acct.email}</span>
             </button>
           ))}

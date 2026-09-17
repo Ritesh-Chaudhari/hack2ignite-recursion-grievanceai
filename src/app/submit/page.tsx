@@ -8,10 +8,9 @@ import {
   LanguageBadge,
   PriorityBadge,
 } from "@/components/badges";
-import { CATEGORIES, DEPARTMENTS, LANGUAGES } from "@/lib/constants";
+import { CATEGORIES, DEPARTMENTS } from "@/lib/constants";
 import type {
   Category,
-  GrievanceLanguage,
   SubmitGrievanceResponse,
 } from "@/lib/types";
 
@@ -23,18 +22,11 @@ const AI_STAGES = [
   "Writing officer summary…",
 ];
 
-const LANGUAGE_LABELS: Record<GrievanceLanguage, string> = {
-  English: "English",
-  Hindi: "हिंदी",
-  Marathi: "मराठी",
-};
-
 interface FormState {
   title: string;
   description: string;
   location: string;
   category: Category;
-  language: GrievanceLanguage;
 }
 
 const INITIAL_FORM: FormState = {
@@ -42,7 +34,6 @@ const INITIAL_FORM: FormState = {
   description: "",
   location: "",
   category: "Other",
-  language: "English",
 };
 
 function validate(form: FormState): Partial<Record<keyof FormState, string>> {
@@ -159,6 +150,24 @@ export default function SubmitPage() {
     );
   }
 
+  // Only citizens can file grievances
+  if (user.role === "admin") {
+    return (
+      <div className="mx-auto flex max-w-md flex-col items-center px-4 py-24 text-center">
+        <div className="card animate-pop w-full p-10">
+          <div className="mx-auto mb-4 flex h-14 w-14 items-center justify-center rounded-2xl bg-warn-soft text-2xl">
+            🛡️
+          </div>
+          <h1 className="text-xl font-black text-ink">Officers cannot file grievances</h1>
+          <p className="mt-2 text-sm text-muted">
+            As an officer, you can view and manage grievances from the dashboard.
+          </p>
+          <Link href="/admin" className="btn btn-primary mt-6">Go to Dashboard</Link>
+        </div>
+      </div>
+    );
+  }
+
   // ---------------------------------------------------------------------------
   // Confirmation screen
   // ---------------------------------------------------------------------------
@@ -248,34 +257,21 @@ export default function SubmitPage() {
           File a grievance
         </h1>
         <p className="mt-1.5 text-sm text-muted">
-          Tell us what&rsquo;s wrong. AI will classify, prioritize and route it to
-          the right department in seconds.
+          Tell us what&rsquo;s wrong. Write in any language — AI will understand and route it to the right department.
         </p>
       </div>
 
       <form onSubmit={handleSubmit} className="card animate-fade-up mt-6 space-y-5 p-6 sm:p-8" noValidate>
-        {/* Language selector */}
-        <div>
-          <span className="label">
-            Write in <span className="text-muted">(AI auto-detects the language)</span>
-          </span>
-          <div className="grid grid-cols-3 gap-2" role="radiogroup" aria-label="Select language for your grievance">
-            {LANGUAGES.map((lang) => (
-              <button
-                key={lang}
-                type="button"
-                role="radio"
-                aria-checked={form.language === lang}
-                onClick={() => update("language", lang)}
-                className={`rounded-xl border px-3 py-2.5 text-sm font-semibold transition-all duration-200 ${
-                  form.language === lang
-                    ? "border-primary bg-primary-soft text-primary-dark ring-2 ring-primary/20"
-                    : "border-line bg-white text-muted hover:border-primary/40 hover:text-ink"
-                }`}
-              >
-                {LANGUAGE_LABELS[lang]}
-              </button>
-            ))}
+        {/* Language info - no selector needed */}
+        <div className="rounded-xl border border-teal-accent/25 bg-teal-soft/40 p-4">
+          <div className="flex items-start gap-3">
+            <span className="text-xl">🌐</span>
+            <div>
+              <p className="text-sm font-semibold text-ink">Write in any language</p>
+              <p className="mt-1 text-xs text-muted">
+                Hindi, Marathi, English, or any other language — our AI will automatically detect and understand your complaint.
+              </p>
+            </div>
           </div>
         </div>
 
@@ -303,15 +299,14 @@ export default function SubmitPage() {
           <label htmlFor="description" className="label">
             Description
             <span className="ml-2 text-xs font-normal text-muted">
-              {form.description.trim().length}/20 min — write freely in any of the
-              three languages
+              {form.description.trim().length}/20 min — write freely in any language
             </span>
           </label>
           <textarea
             id="description"
             rows={5}
             className={`field resize-y ${showFieldError("description") ? "field-error" : ""}`}
-            placeholder="Describe the problem, since when, and who is affected…"
+            placeholder="Describe the problem, since when, and who is affected… (you can write in Hindi, Marathi, or any language)"
             value={form.description}
             onChange={(e) => update("description", e.target.value)}
             onBlur={() => setTouched((t) => ({ ...t, description: true }))}
@@ -370,7 +365,7 @@ export default function SubmitPage() {
         </button>
       </form>
 
-      {/* AI processing overlay — CSS transitions instead of framer-motion */}
+      {/* AI processing overlay */}
       {submitting && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-navy/70 backdrop-blur-sm animate-fade-in">
           <div className="mx-4 w-full max-w-sm animate-pop rounded-2xl bg-white p-7 shadow-2xl">
