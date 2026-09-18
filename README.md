@@ -254,10 +254,10 @@ Recent development (see `git log` for the full history):
 
 | Member | Role |
 |---|---|
-| Ritesh Chaudhari | Team lead · Full-stack development & AI integration |
-| *(add teammates here)* | Frontend & UX |
-| *(add teammates here)* | Database & dashboard |
-| *(add teammates here)* | Testing & demo prep |
+| *Ritesh Chaudhari* | Team lead · Full-stack development & AI integration |
+| *Dipali Bagul* | Frontend & UX |
+| *Kajal Kapure* | Database & dashboard |
+| *Kunal Chaudhari* | Testing & demo prep |
 
 ## 🙏 Acknowledgments
 
