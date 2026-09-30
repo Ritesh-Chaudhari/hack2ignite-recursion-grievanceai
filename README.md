@@ -135,7 +135,7 @@ Copy `.env.example` → `.env.local` and fill in:
 | `GEMINI_API_KEY` | Optional | Google Gemini API key for AI triage. Without it, submissions use the keyword-heuristic fallback instead of AI. |
 | `AUTH_SECRET` | **Yes in production** | JWT signing secret for session cookies. Dev-only default exists; generate one with `openssl rand -hex 32`. |
 | `GEMINI_MODEL` | Optional | Gemini model override (default: `gemini-3.8-flash`). |
-
+| `GEMINI_FALLBACK_MODELS` | Optional | Comma-separated standby models tried when the primary is overloaded (429/5xx) or retired (404). Default: `gemini-3.7-flash,gemini-3.5-flash,gemini-3.5-flash-lite`. |
 > ⚠️ **Never commit real values.** `.env.local` is git-ignored; keep it that way. Rotate any key that is ever committed accidentally.
 
 ---

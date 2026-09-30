@@ -1,4 +1,4 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, type GenerateContentResponse } from "@google/genai";
 import {
   CATEGORIES,
   DEPARTMENTS,
@@ -20,8 +20,31 @@ import type {
  * grievance is still stored and triaged (marked aiProcessed: false).
  */
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
+/** Primary model, overridable via GEMINI_MODEL. */
+const PRIMARY_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
+
+/**
+ * Standby models tried in order when the primary is unavailable
+ * (capacity 429, server errors 5xx, or retired model name 404).
+ */
+const FALLBACK_MODELS = (
+  process.env.GEMINI_FALLBACK_MODELS ??
+  "gemini-3.7-flash,gemini-3.5-flash,gemini-3.5-flash-lite"
+)
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+const MODEL_CHAIN = [...new Set([PRIMARY_MODEL, ...FALLBACK_MODELS])];
+
 const TIMEOUT_MS = 15_000;
+
+function isFailoverError(err: unknown): boolean {
+  const status = (err as { status?: number } | null)?.status;
+  return (
+    status === 429 || status === 404 || (typeof status === "number" && status >= 500)
+  );
+}
 
 const SYSTEM_INSTRUCTION = `You are the triage engine for an Indian municipal grievance portal.
 Citizens submit complaints in English, Hindi, or Marathi (Devanagari script).
@@ -66,17 +89,19 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer!));
 }
 
-function callGemini(apiKey: string, title: string, description: string) {
+function callGemini(apiKey: string, model: string, title: string, description: string) {
   const ai = new GoogleGenAI({ apiKey });
   return ai.models.generateContent({
-    model: MODEL,
+    model,
     contents: `Grievance title: ${title}\n\nGrievance description:\n${description}`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
       temperature: 0.2,
-      maxOutputTokens: 512,
+      // Gemini 3.x models spend output tokens on internal reasoning before
+      // emitting the JSON; 512 truncated responses mid-string.
+      maxOutputTokens: 2048,
     },
   });
 }
@@ -195,10 +220,37 @@ export async function analyzeGrievance(
   }
 
   try {
-    const response = await withTimeout(
-      callGemini(apiKey, title, description),
-      TIMEOUT_MS,
-    );
+    let response: GenerateContentResponse | undefined;
+    let lastError: unknown;
+    // Capacity 503/429 spikes are usually brief; try each standby model once,
+    // then (if every failure was transient) retry the whole chain one time.
+    for (let pass = 0; pass < 2 && !response; pass++) {
+      if (pass > 0) {
+        console.warn("[ai] all models busy — retrying chain once after 1 s");
+        await new Promise((r) => setTimeout(r, 1_000));
+      }
+      for (const model of MODEL_CHAIN) {
+        try {
+          response = await withTimeout(
+            callGemini(apiKey, model, title, description),
+            TIMEOUT_MS,
+          );
+          if (model !== MODEL_CHAIN[0] || pass > 0) {
+            console.warn(`[ai] served by model: ${model} (chain pass ${pass + 1})`);
+          }
+          break;
+        } catch (err) {
+          lastError = err;
+          if (!isFailoverError(err)) throw err;
+          console.warn(
+            `[ai] model ${model} unavailable (${err instanceof Error ? err.message : String(err)}) — trying next model`,
+          );
+        }
+      }
+    }
+    if (!response) {
+      throw lastError ?? new Error("All Gemini models failed");
+    }
     const raw = response.text?.trim();
     if (!raw) throw new Error("Empty Gemini response");
     const parsed = JSON.parse(raw) as Partial<GrievanceAnalysis>;
