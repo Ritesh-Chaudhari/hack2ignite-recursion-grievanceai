@@ -20,7 +20,7 @@ import type {
  * grievance is still stored and triaged (marked aiProcessed: false).
  */
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+const MODEL = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
 const TIMEOUT_MS = 15_000;
 
 const SYSTEM_INSTRUCTION = `You are the triage engine for an Indian municipal grievance portal.
