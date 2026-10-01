@@ -1,26 +1,56 @@
 import { NextResponse } from "next/server";
 import { CATEGORIES, PRIORITIES, STATUSES } from "@/lib/constants";
 import { getSession } from "@/lib/session";
-import { findGrievanceById, updateGrievance } from "@/lib/store";
-import type { Category, Priority, Status } from "@/lib/types";
+import { findGrievanceByReference, updateGrievance } from "@/lib/store";
+import type {
+  Category,
+  Grievance,
+  Priority,
+  PublicGrievance,
+  Status,
+} from "@/lib/types";
 
+/** Tracking-safe view: no submitter identity, no full description. */
+function toPublicGrievance(g: Grievance): PublicGrievance {
+  return {
+    id: g.id,
+    title: g.title,
+    language: g.language,
+    category: g.category,
+    priority: g.priority,
+    status: g.status,
+    location: g.location,
+    createdAt: g.createdAt,
+    updatedAt: g.updatedAt,
+    aiSummary: g.aiSummary,
+    aiProcessed: g.aiProcessed,
+  };
+}
+
+/**
+ * Public grievance lookup used by /track. Accepts the full id or the short
+ * reference printed on the confirmation screen. Owners and officers get the
+ * full record; everyone else gets the public tracking view.
+ */
 export async function GET(
   _request: Request,
   { params }: { params: Promise<{ id: string }> },
 ) {
-  const session = await getSession();
-  if (!session) {
-    return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-  }
   const { id } = await params;
-  const grievance = await findGrievanceById(id);
+  const grievance = await findGrievanceByReference(id);
   if (!grievance) {
     return NextResponse.json({ error: "Grievance not found." }, { status: 404 });
   }
-  if (session.role !== "admin" && grievance.submittedBy !== session.userId) {
-    return NextResponse.json({ error: "Forbidden" }, { status: 403 });
-  }
-  return NextResponse.json({ grievance });
+
+  const session = await getSession();
+  const canSeeFull =
+    session !== null &&
+    (session.role === "admin" || grievance.submittedBy === session.userId);
+
+  return NextResponse.json({
+    grievance: canSeeFull ? grievance : toPublicGrievance(grievance),
+    visibility: canSeeFull ? "full" : "public",
+  });
 }
 
 export async function PATCH(

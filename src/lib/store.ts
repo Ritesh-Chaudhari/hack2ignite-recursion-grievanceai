@@ -278,6 +278,40 @@ export async function findGrievanceById(
   return local.grievances.find((g) => g.id === id) ?? null;
 }
 
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Resolve a grievance from what citizens are actually given: either the full
+ * id or the short reference shown on the confirmation screen (the first 8
+ * characters, uppercased). Matching is case-insensitive; a prefix only counts
+ * when it matches exactly one grievance.
+ */
+export async function findGrievanceByReference(
+  reference: string,
+): Promise<Grievance | null> {
+  const ref = reference.trim().toLowerCase();
+  if (!ref) return null;
+
+  const models = await getMongoModels();
+  if (models) {
+    const exact = await models.Grievance.findOne({ id: ref }).lean<Grievance | null>();
+    if (exact) return coerceGrievance(exact);
+    const matches = await models.Grievance.find({ id: { $regex: `^${escapeRegex(ref)}` } })
+      .limit(2)
+      .lean<Grievance[]>();
+    if (matches.length !== 1) return null;
+    return coerceGrievance(matches[0]);
+  }
+
+  const local = await readLocal();
+  const exact = local.grievances.find((g) => g.id.toLowerCase() === ref);
+  if (exact) return exact;
+  const matches = local.grievances.filter((g) => g.id.toLowerCase().startsWith(ref));
+  return matches.length === 1 ? matches[0] : null;
+}
+
 export async function listGrievancesByUser(userId: string): Promise<Grievance[]> {
   const models = await getMongoModels();
   if (models) {

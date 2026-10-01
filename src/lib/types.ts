@@ -60,6 +60,31 @@ export interface Grievance {
   duplicateOf?: string[];
 }
 
+/**
+ * Public tracking view of a grievance: everything needed to follow status,
+ * without the full description or the submitter's identity.
+ */
+export interface PublicGrievance {
+  id: string;
+  title: string;
+  language: GrievanceLanguage;
+  category: Category;
+  priority: Priority;
+  status: Status;
+  location: string;
+  createdAt: string;
+  updatedAt: string;
+  aiSummary: string;
+  aiProcessed: boolean;
+}
+
+/** Response for GET /api/grievances/[id]. */
+export interface TrackGrievanceResponse {
+  grievance: Grievance | PublicGrievance;
+  /** "full" when the requester owns the grievance or is an officer. */
+  visibility: "full" | "public";
+}
+
 export interface AuthResponse {
   user: PublicUser;
 }
