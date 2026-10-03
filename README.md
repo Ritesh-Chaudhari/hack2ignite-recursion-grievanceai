@@ -60,7 +60,7 @@ Officers triage everything from a live dashboard with KPI cards, SLA monitoring,
 | Language | TypeScript (strict) |
 | UI | **Tailwind CSS v4** custom design system, skeleton loaders, CSS animations |
 | Database | **MongoDB Atlas** (Mongoose, cached connection, serverless-ready) with a local JSON fallback for zero-setup demos |
-| AI | **Google Gemini API** (`@google/genai`, structured JSON output, `gemini-2.5-flash`) |
+| AI | **Google Gemini API** (`@google/genai`, structured JSON output, `GEMINI_MODEL` env override) |
 | Charts | **Recharts** (lazy-loaded to keep the initial bundle small) |
 | Auth | Email + password (scrypt hashing, HS256 JWT session cookies via `jose`) |
 
@@ -134,8 +134,8 @@ Copy `.env.example` → `.env.local` and fill in:
 | `MONGODB_URI` | **Yes in production** | MongoDB connection string. Also accepted: `MONGODB_URL`. In production a connection failure is a hard error; in development the app falls back to the local JSON store at `./data/grievance-ai-data.json` (not supported on serverless hosts). Values are auto-trimmed and surrounding quotes stripped. |
 | `GEMINI_API_KEY` | Optional | Google Gemini API key for AI triage. Without it, submissions use the keyword-heuristic fallback instead of AI. |
 | `AUTH_SECRET` | **Yes in production** | JWT signing secret for session cookies. Dev-only default exists; generate one with `openssl rand -hex 32`. |
-| `GEMINI_MODEL` | Optional | Gemini model override (default: `gemini-2.5-flash`). |
-
+| `GEMINI_MODEL` | Optional | Gemini model override (default: `gemini-3.8-flash`). |
+| `GEMINI_FALLBACK_MODELS` | Optional | Comma-separated standby models tried when the primary is overloaded (429/5xx) or retired (404). Default: `gemini-3.7-flash,gemini-3.5-flash,gemini-3.5-flash-lite`. |
 > ⚠️ **Never commit real values.** `.env.local` is git-ignored; keep it that way. Rotate any key that is ever committed accidentally.
 
 ---
@@ -217,7 +217,7 @@ src/
 
 ## 🤖 How the AI triage works
 
-Every submission triggers one structured-output call to `gemini-2.5-flash` (temperature 0.2, 15 s timeout) with a JSON schema enforcing:
+Every submission triggers one structured-output call to the configured Gemini model (temperature 0.2, 15 s timeout) with a JSON schema enforcing:
 
 1. **`detectedLanguage`** — the language actually used in the text (English / Hindi / Marathi)
 2. **`category`** — exactly one of the six categories

@@ -1,14 +1,16 @@
-import { GoogleGenAI, Type } from "@google/genai";
+import { GoogleGenAI, Type, type GenerateContentResponse } from "@google/genai";
 import {
   CATEGORIES,
   DEPARTMENTS,
   PRIORITIES,
+  TIMEFRAME_BY_PRIORITY,
 } from "@/lib/constants";
 import type {
   Category,
   GrievanceAnalysis,
   GrievanceLanguage,
   Priority,
+  ResolutionTimeframe,
 } from "@/lib/types";
 
 /**
@@ -20,8 +22,31 @@ import type {
  * grievance is still stored and triaged (marked aiProcessed: false).
  */
 
-const MODEL = process.env.GEMINI_MODEL ?? "gemini-2.5-flash";
+/** Primary model, overridable via GEMINI_MODEL. */
+const PRIMARY_MODEL = process.env.GEMINI_MODEL ?? "gemini-3.8-flash";
+
+/**
+ * Standby models tried in order when the primary is unavailable
+ * (capacity 429, server errors 5xx, or retired model name 404).
+ */
+const FALLBACK_MODELS = (
+  process.env.GEMINI_FALLBACK_MODELS ??
+  "gemini-3.7-flash,gemini-3.5-flash,gemini-3.5-flash-lite"
+)
+  .split(",")
+  .map((m) => m.trim())
+  .filter(Boolean);
+
+const MODEL_CHAIN = [...new Set([PRIMARY_MODEL, ...FALLBACK_MODELS])];
+
 const TIMEOUT_MS = 15_000;
+
+function isFailoverError(err: unknown): boolean {
+  const status = (err as { status?: number } | null)?.status;
+  return (
+    status === 429 || status === 404 || (typeof status === "number" && status >= 500)
+  );
+}
 
 const SYSTEM_INSTRUCTION = `You are the triage engine for an Indian municipal grievance portal.
 Citizens submit complaints in English, Hindi, or Marathi (Devanagari script).
@@ -35,6 +60,17 @@ For every grievance you must:
    Medium = recurring or multi-day single-area issues. Low = cosmetic or minor inconveniences.
 4. summary — a neutral 1-2 sentence English summary of the complaint, regardless of input language.
    Mention what, where, and the impact. Never invent facts not present in the complaint.
+5. recommendedResolution — a short, actionable recommendation for the municipal officer who must
+   fix this. Cover three things in 2-3 plain sentences (no markdown, no numbered list, no header):
+   the concrete steps to take, what typically resolves this type of issue, and an estimated
+   resolution timeframe. Calibrate the timeframe to priority (Urgent: same day/24h, High: 2-3 days,
+   Medium: about a week, Low: within two weeks) and to what the department realistically does.
+   Write it in English even if the complaint is in another language. Give practical municipal advice
+   (e.g. "isolate the leak, replace the damaged 2-inch pipe section, then flush and test the line");
+   never invent facts about the complaint itself.
+6. resolutionTimeframe — pick exactly one estimate for how long the full fix takes, from this
+   list: "Same day", "24 hours", "2-3 days", "About a week", "Within two weeks".
+   It must agree with the timeframe you gave in recommendedResolution and with your priority.
 
 Respond with JSON only, matching the provided schema.`;
 
@@ -48,8 +84,20 @@ const RESPONSE_SCHEMA = {
     category: { type: Type.STRING, enum: [...CATEGORIES] },
     priority: { type: Type.STRING, enum: [...PRIORITIES] },
     summary: { type: Type.STRING },
+    recommendedResolution: { type: Type.STRING },
+    resolutionTimeframe: {
+      type: Type.STRING,
+      enum: ["Same day", "24 hours", "2-3 days", "About a week", "Within two weeks"],
+    },
   },
-  required: ["detectedLanguage", "category", "priority", "summary"],
+  required: [
+    "detectedLanguage",
+    "category",
+    "priority",
+    "summary",
+    "recommendedResolution",
+    "resolutionTimeframe",
+  ],
 } as const;
 
 export interface AnalysisResult {
@@ -66,17 +114,19 @@ function withTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
   return Promise.race([promise, timeout]).finally(() => clearTimeout(timer!));
 }
 
-function callGemini(apiKey: string, title: string, description: string) {
+function callGemini(apiKey: string, model: string, title: string, description: string) {
   const ai = new GoogleGenAI({ apiKey });
   return ai.models.generateContent({
-    model: MODEL,
+    model,
     contents: `Grievance title: ${title}\n\nGrievance description:\n${description}`,
     config: {
       systemInstruction: SYSTEM_INSTRUCTION,
       responseMimeType: "application/json",
       responseSchema: RESPONSE_SCHEMA,
       temperature: 0.2,
-      maxOutputTokens: 512,
+      // Gemini 3.x models spend output tokens on internal reasoning before
+      // emitting the JSON; 512 truncated responses mid-string.
+      maxOutputTokens: 2048,
     },
   });
 }
@@ -110,6 +160,44 @@ function detectLanguageHeuristic(
   if (hi > mr) return "Hindi";
   return selected === "English" ? "Hindi" : selected;
 }
+
+/**
+ * Per-category guidance used when Gemini is unavailable. Combined with an
+ * SLA-derived timeframe so the field is still useful offline.
+ */
+const RESOLUTION_TIPS: Record<Category, string> = {
+  Water: "Shut off the affected valve, replace or reseal the leaking pipe joint, then flush the line and test the supply before restoring it to households",
+  Roads: "Sweep and fill the pothole with wet mix in layers, compact each layer, and mark the patch until it cures; resurface the stretch if the base is damaged",
+  Electricity: "De-energize the line, replace the damaged conductor or insulator, re-tension it, and confirm the fix with a continuity and earth-leakage test",
+  Sanitation: "Deploy a clearing crew and a jetting machine to remove the blockage, sanitize the area, and put the route on a fixed weekly collection schedule",
+  Safety: "Cordon the hazard, inspect it with the relevant technical team, repair or remove the danger, and post a warning sign until the site is cleared",
+  Other: "Assign an inspecting officer to verify the issue on site, carry out the standard repair for this category, and confirm closure with the complainant",
+};
+
+/** Maps priority to the SLA window quoted in the offline recommendation. */
+const SLA_TEXT: Record<Priority, string> = {
+  Urgent: "within 24 hours",
+  High: "within 2-3 days",
+  Medium: "within a week",
+  Low: "within two weeks",
+};
+
+function resolutionHeuristic(category: Category, priority: Priority): string {
+  return `${RESOLUTION_TIPS[category]}. Expected to be completed ${SLA_TEXT[priority]}.`;
+}
+
+/** The same window, as the short token the citizen view renders. */
+function timeframeHeuristic(priority: Priority): ResolutionTimeframe {
+  return TIMEFRAME_BY_PRIORITY[priority];
+}
+
+const TIMEFRAMES: readonly ResolutionTimeframe[] = [
+  "Same day",
+  "24 hours",
+  "2-3 days",
+  "About a week",
+  "Within two weeks",
+];
 
 const CATEGORY_KEYWORDS: Record<Category, string[]> = {
   Water: ["water", "pipe", "leak", "tap", "supply", "sewage", "drainage", "paani", "पानी", "नल", "रिसाव", "गटार", "पाणी", "नळ", "गळती"],
@@ -165,13 +253,17 @@ function fallbackAnalysis(
   selectedLanguage: GrievanceLanguage,
   selectedCategory: Category,
 ): GrievanceAnalysis {
+  const category = classifyHeuristic(title, description, selectedCategory);
+  const priority = priorityHeuristic(title, description);
   return {
     detectedLanguage: detectLanguageHeuristic(`${title} ${description}`, selectedLanguage),
-    category: classifyHeuristic(title, description, selectedCategory),
-    priority: priorityHeuristic(title, description),
+    category,
+    priority,
     summary: `${title} — reported at the citizen's location. Pending officer review; routed to the ${
       DEPARTMENTS[selectedCategory]
     }.`,
+    recommendedResolution: resolutionHeuristic(category, priority),
+    resolutionTimeframe: timeframeHeuristic(priority),
   };
 }
 
@@ -195,10 +287,37 @@ export async function analyzeGrievance(
   }
 
   try {
-    const response = await withTimeout(
-      callGemini(apiKey, title, description),
-      TIMEOUT_MS,
-    );
+    let response: GenerateContentResponse | undefined;
+    let lastError: unknown;
+    // Capacity 503/429 spikes are usually brief; try each standby model once,
+    // then (if every failure was transient) retry the whole chain one time.
+    for (let pass = 0; pass < 2 && !response; pass++) {
+      if (pass > 0) {
+        console.warn("[ai] all models busy — retrying chain once after 1 s");
+        await new Promise((r) => setTimeout(r, 1_000));
+      }
+      for (const model of MODEL_CHAIN) {
+        try {
+          response = await withTimeout(
+            callGemini(apiKey, model, title, description),
+            TIMEOUT_MS,
+          );
+          if (model !== MODEL_CHAIN[0] || pass > 0) {
+            console.warn(`[ai] served by model: ${model} (chain pass ${pass + 1})`);
+          }
+          break;
+        } catch (err) {
+          lastError = err;
+          if (!isFailoverError(err)) throw err;
+          console.warn(
+            `[ai] model ${model} unavailable (${err instanceof Error ? err.message : String(err)}) — trying next model`,
+          );
+        }
+      }
+    }
+    if (!response) {
+      throw lastError ?? new Error("All Gemini models failed");
+    }
     const raw = response.text?.trim();
     if (!raw) throw new Error("Empty Gemini response");
     const parsed = JSON.parse(raw) as Partial<GrievanceAnalysis>;
@@ -218,9 +337,28 @@ export async function analyzeGrievance(
       typeof parsed.summary === "string" && parsed.summary.trim().length > 0
         ? parsed.summary.trim()
         : fallbackAnalysis(title, description, selectedLanguage, category).summary;
+    const recommendedResolution =
+      typeof parsed.recommendedResolution === "string" &&
+      parsed.recommendedResolution.trim().length > 0
+        ? parsed.recommendedResolution.trim()
+        : resolutionHeuristic(category, priority);
+    // Keep the citizen summary consistent with the prose above: fall back to
+    // the priority window if the model omitted or garbled the enum.
+    const resolutionTimeframe: ResolutionTimeframe = TIMEFRAMES.includes(
+      parsed.resolutionTimeframe as ResolutionTimeframe,
+    )
+      ? (parsed.resolutionTimeframe as ResolutionTimeframe)
+      : timeframeHeuristic(priority);
 
     return {
-      analysis: { detectedLanguage, category, priority, summary },
+      analysis: {
+        detectedLanguage,
+        category,
+        priority,
+        summary,
+        recommendedResolution,
+        resolutionTimeframe,
+      },
       aiProcessed: true,
     };
   } catch (err) {

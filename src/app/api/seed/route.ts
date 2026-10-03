@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { TIMEFRAME_BY_PRIORITY } from "@/lib/constants";
 import { countGrievances, insertGrievance } from "@/lib/store";
 import type { Grievance } from "@/lib/types";
 
@@ -19,6 +20,7 @@ interface SeedSpec {
   submitterName: string;
   hoursAgo: number;
   aiSummary: string;
+  recommendedResolution: string;
 }
 
 const SEEDS: SeedSpec[] = [
@@ -35,6 +37,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 5,
     aiSummary:
       "Snapped high-tension wire hanging over a school lane in Shivaji Nagar, Ward 12, posing immediate electrocution risk to schoolchildren.",
+    recommendedResolution:
+      "Isolate power to the feeder immediately and place a barricade and spotter at the lane. Replace the snapped conductor, re-tension it, then restore supply only after an earth and continuity test. Expected within 24 hours (Urgent).",
   },
   {
     title: "Contaminated water supply for three days",
@@ -49,6 +53,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 9,
     aiSummary:
       "Residents of Gandhi Chowk, Ward 7 reporting discolored, foul-smelling water for three days with suspected contamination and illness cases.",
+    recommendedResolution:
+      "Take grab samples from the affected main and the source reservoir for lab testing the same day, and run a chlorination shock dose on the affected branch. Issue a boil-water advisory until results clear, then flush the line. Expected within 24 hours (Urgent).",
   },
   {
     title: "सार्वजनिक शौचालय अत्यंत गंदगी ( filthy public toilet block )",
@@ -63,6 +69,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 26,
     aiSummary:
       "Public toilet block near the Nagpur Road bus stand uncleaned for a week; foul odor affecting nearby shops, garbage pickup requested.",
+    recommendedResolution:
+      "Assign a deep-cleaning crew with a jetting machine and disinfectant to the block, clear the choked waste line, and restock consumables. Add the block to a fixed daily cleaning roster and verify with a photo log. Expected within 2-3 days (High).",
   },
   {
     title: "मुख्य सड़क पर गड्ढों से दुर्घटनाएँ",
@@ -77,6 +85,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 40,
     aiSummary:
       "Large rain-damaged potholes on Market Road, Ward 3 near the speed breaker causing motorcycle accidents at night; water logging hides them.",
+    recommendedResolution:
+      "Mark and barricade the potholes, drain the standing water, then patch with wet-mix in compacted layers rather than loose fill. Desilt the nearby drain so water does not re-open the patch, and re-mark the speed breaker. Expected within 2-3 days (High).",
   },
   {
     title: "Streetlights not working near park",
@@ -91,6 +101,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 60,
     aiSummary:
       "Eight streetlight poles dead for two weeks near the community park in Shivaji Nagar, leaving the stretch dark and unsafe after 7 pm.",
+    recommendedResolution:
+      "Trace the circuit feeding these poles for a tripped feeder or cable fault, replace the failed LED gear and any dead photocell, and restore supply after an insulation test. Check the neighbouring poles on the same run while on site. Expected within 2-3 days (High).",
   },
   {
     title: "Garbage not collected from society bins",
@@ -105,6 +117,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 76,
     aiSummary:
       "Municipal garbage collection missed for over a week at a society in Gandhi Chowk, Ward 7; overflowing bins attracting stray dogs.",
+    recommendedResolution:
+      "Send a pickup truck to clear the overflowing bins and clean the spill, then put the society on a fixed alternate-day collection slot with a named contractor. Confirm with the society secretary before marking resolved. Expected within a week (Medium).",
   },
   {
     title: "Low water pressure in evening hours",
@@ -119,6 +133,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 90,
     aiSummary:
       "Low water pressure between 6-9 pm on upper floors in Nehru Nagar, Ward 5 for roughly ten days, disrupting household chores.",
+    recommendedResolution:
+      "Check the timing pump schedule and the non-return valve for the overhead tank, and look for a partially closed or leaking valve on the branch. Verify residual pressure at the farthest tap during peak hours after the fix. Expected within a week (Medium).",
   },
   {
     title: "Fallen tree blocking the service road",
@@ -133,6 +149,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 120,
     aiSummary:
       "Tree uprooted across the NH-53 service road near the petrol pump overnight, blocking traffic; fire brigade removal requested.",
+    recommendedResolution:
+      "Clear the trunk with a chainsaw crew and tow the debris to restore one lane of traffic first, then check for a damaged streetlight pole or underground cable before reopening fully. Expected within 24 hours (Urgent); already completed for this record.",
   },
   {
     title: "झाड़तोडणी नंतर उभा राहिलेला तोडगेलेला झाडाचा खोड",
@@ -147,6 +165,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 140,
     aiSummary:
       "Unstable half-cut tree trunk left leaning over the NH-53 service road after trimming, risking falling onto passing vehicles.",
+    recommendedResolution:
+      "Cordon the stretch, then fell the leaning trunk in controlled sections from a hydraulic platform rather than by hand. Clear the stump to ground level and inspect the canopy above for hanging limbs. Expected within 2-3 days (High); already completed for this record.",
   },
   {
     title: "Frequent power cuts in industrial area",
@@ -161,6 +181,8 @@ const SEEDS: SeedSpec[] = [
     hoursAgo: 160,
     aiSummary:
       "Unscheduled power cuts four to five times daily for two weeks across the MIDC industrial estate, hurting small workshop productivity.",
+    recommendedResolution:
+      "Pull the feeder fault log and check for an overloaded or failing distribution transformer on this feed. Replace the faulty oil or connections, rebalance the load across phases, and share the revised supply schedule with the estate association. Expected within a week (Medium); already completed for this record.",
   },
 ];
 
@@ -188,6 +210,8 @@ async function doSeed(): Promise<{ seeded: boolean; count?: number }> {
       createdAt,
       updatedAt: createdAt,
       aiSummary: s.aiSummary,
+      recommendedResolution: s.recommendedResolution,
+      resolutionTimeframe: TIMEFRAME_BY_PRIORITY[s.priority],
       aiProcessed: true,
       duplicateOf:
         s.title === "Streetlights not working near park"

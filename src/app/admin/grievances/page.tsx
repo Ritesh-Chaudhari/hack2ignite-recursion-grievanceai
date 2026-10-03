@@ -3,6 +3,7 @@
 import { lazy, Suspense, useCallback, useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
+import { ResolutionNote } from "@/components/resolution-note";
 import {
   CategoryBadge,
   PriorityBadge,
@@ -264,6 +265,14 @@ export default function AllGrievancesPage() {
                           month: "short",
                         })}
                       </p>
+                      <ResolutionNote
+                        category={g.category}
+                        priority={g.priority}
+                        recommendedResolution={g.recommendedResolution}
+                        resolutionTimeframe={g.resolutionTimeframe}
+                        aiProcessed={g.aiProcessed}
+                        className="mt-3"
+                      />
                     </div>
                     <div className="flex shrink-0 flex-wrap items-center gap-1.5">
                       <CategoryBadge category={g.category} />

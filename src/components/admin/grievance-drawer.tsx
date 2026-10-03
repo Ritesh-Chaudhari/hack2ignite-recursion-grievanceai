@@ -8,6 +8,7 @@ import {
   StatusBadge,
 } from "@/components/badges";
 import { StatusTimeline } from "@/components/status-timeline";
+import { ResolutionNote } from "@/components/resolution-note";
 import { CATEGORIES, DEPARTMENTS, PRIORITIES, STATUSES } from "@/lib/constants";
 import type { Category, Grievance, Priority, Status } from "@/lib/types";
 
@@ -145,6 +146,14 @@ export function GrievanceDrawer({
               &ldquo;{grievance.aiSummary || "—"}&rdquo;
             </p>
           </div>
+
+          <ResolutionNote
+            category={grievance.category}
+            priority={grievance.priority}
+            recommendedResolution={grievance.recommendedResolution}
+            resolutionTimeframe={grievance.resolutionTimeframe}
+            aiProcessed={grievance.aiProcessed}
+          />
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wide text-muted">

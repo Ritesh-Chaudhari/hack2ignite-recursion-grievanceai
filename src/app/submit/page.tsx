@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
+import { ResolutionNote } from "@/components/resolution-note";
 import {
   CategoryBadge,
   LanguageBadge,
@@ -212,6 +213,15 @@ export default function SubmitPage() {
               </div>
             </div>
 
+            <ResolutionNote
+              category={g.category}
+              priority={g.priority}
+              recommendedResolution={g.recommendedResolution}
+              resolutionTimeframe={g.resolutionTimeframe}
+              aiProcessed={g.aiProcessed}
+              className="animate-fade-up"
+            />
+
             {result.similar.length > 0 && (
               <div className="animate-fade-up rounded-xl border border-warn/25 bg-warn-soft/50 p-4">
                 <p className="text-xs font-bold uppercase tracking-wide text-warn">
@@ -233,13 +243,25 @@ export default function SubmitPage() {
             )}
 
             <div className="flex flex-col gap-3 pt-1 sm:flex-row">
-              <Link href="/my-grievances" className="btn btn-primary flex-1">
+              <Link
+                href={`/track?id=${encodeURIComponent(g.id.slice(0, 8))}`}
+                className="btn btn-primary flex-1"
+              >
                 Track my grievance
               </Link>
               <button onClick={resetAll} className="btn btn-ghost flex-1">
                 Submit another
               </button>
             </div>
+            <p className="text-center text-xs text-muted">
+              Want every complaint you&rsquo;ve filed?{" "}
+              <Link
+                href="/my-grievances"
+                className="font-semibold text-primary underline-offset-2 hover:underline"
+              >
+                Open my dashboard →
+              </Link>
+            </p>
           </div>
         </div>
       </div>

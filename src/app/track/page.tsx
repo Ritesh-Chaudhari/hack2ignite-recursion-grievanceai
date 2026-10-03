@@ -1,45 +1,65 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { CategoryBadge, PriorityBadge, StatusBadge } from "@/components/badges";
+import { ResolutionNote } from "@/components/resolution-note";
 import { StatusTimeline } from "@/components/status-timeline";
 import { DEPARTMENTS } from "@/lib/constants";
-import type { Grievance } from "@/lib/types";
+import type { Grievance, PublicGrievance, TrackGrievanceResponse } from "@/lib/types";
 
 export default function TrackPage() {
   const [id, setId] = useState("");
-  const [grievance, setGrievance] = useState<Grievance | null>(null);
+  const [grievance, setGrievance] = useState<Grievance | PublicGrievance | null>(null);
+  const [visibility, setVisibility] = useState<"full" | "public">("public");
   const [error, setError] = useState<string | null>(null);
   const [loading, setLoading] = useState(false);
 
-  async function handleSearch(e: React.FormEvent) {
-    e.preventDefault();
+  async function lookup(raw: string) {
     setError(null);
     setGrievance(null);
-    const trimmed = id.trim();
+    const trimmed = raw.trim();
     if (!trimmed) {
-      setError("Please enter a grievance ID.");
+      setError("Please enter a grievance reference ID.");
       return;
     }
     setLoading(true);
     try {
-      const res = await fetch(`/api/grievances/${trimmed}`);
+      const res = await fetch(`/api/grievances/${encodeURIComponent(trimmed)}`);
       if (res.status === 404) {
-        setError("No grievance found with that ID. Please check and try again.");
+        setError(
+          "No grievance found with that reference. Check the Reference # from your confirmation and try again.",
+        );
         return;
       }
       if (!res.ok) {
-        const data = (await res.json()) as { error?: string };
-        setError(data.error ?? "Could not look up grievance.");
+        const data = (await res.json().catch(() => ({}))) as { error?: string };
+        setError(data.error ?? "Could not look up grievance. Please try again.");
         return;
       }
-      const data = (await res.json()) as { grievance: Grievance };
+      const data = (await res.json()) as TrackGrievanceResponse;
       setGrievance(data.grievance);
+      setVisibility(data.visibility ?? "public");
     } catch {
       setError("Network error. Please try again.");
     } finally {
       setLoading(false);
     }
+  }
+
+  // Support /track?id=REF deep links (e.g. the "Track my grievance" button on
+  // the submission confirmation screen) — look the reference up immediately.
+  useEffect(() => {
+    const initial = new URLSearchParams(window.location.search).get("id");
+    if (initial?.trim()) {
+      setId(initial.trim());
+      void lookup(initial);
+    }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
+
+  async function handleSearch(e: React.FormEvent) {
+    e.preventDefault();
+    await lookup(id);
   }
 
   return (
@@ -52,8 +72,8 @@ export default function TrackPage() {
           Track your grievance
         </h1>
         <p className="mt-2 text-sm text-muted">
-          Enter your grievance reference ID to see the current status.
-          No login required.
+          Enter the Reference # from your confirmation screen to see the current
+          status. No login required.
         </p>
       </div>
 
@@ -66,9 +86,10 @@ export default function TrackPage() {
             id="grievance-id"
             type="text"
             className="field flex-1"
-            placeholder="e.g. seed-1 or a UUID"
+            placeholder="e.g. 3F2504E0 or seed-1"
             value={id}
             onChange={(e) => setId(e.target.value)}
+            aria-label="Grievance reference ID"
           />
           <button
             type="submit"
@@ -86,9 +107,16 @@ export default function TrackPage() {
       {grievance && (
         <div className="card animate-fade-up mt-6 overflow-hidden">
           <div className="border-b border-line px-6 py-4 bg-gradient-to-r from-primary/5 to-teal-accent/5">
-            <p className="text-xs font-semibold uppercase tracking-wide text-muted">
-              Ref #{grievance.id.slice(0, 8).toUpperCase()}
-            </p>
+            <div className="flex flex-wrap items-center justify-between gap-2">
+              <p className="text-xs font-semibold uppercase tracking-wide text-muted">
+                Ref #{grievance.id.slice(0, 8).toUpperCase()}
+              </p>
+              {visibility === "public" && (
+                <span className="rounded-full border border-teal-accent/30 bg-teal-soft/50 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wide text-teal-accent">
+                  🌍 public tracking view
+                </span>
+              )}
+            </div>
             <h2 className="mt-1 text-lg font-black text-ink">
               {grievance.title}
             </h2>
@@ -142,6 +170,14 @@ export default function TrackPage() {
                 </p>
               </div>
             )}
+
+            <ResolutionNote
+              category={grievance.category}
+              priority={grievance.priority}
+              recommendedResolution={grievance.recommendedResolution}
+              resolutionTimeframe={grievance.resolutionTimeframe}
+              aiProcessed={grievance.aiProcessed}
+            />
           </div>
         </div>
       )}

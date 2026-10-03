@@ -1,14 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import mongoose, { type Model, Schema } from "mongoose";
+import mongoose, {
+  type Model,
+  type SchemaDefinitionProperty,
+  Schema,
+} from "mongoose";
 import { validateEnv } from "@/lib/env";
+import { TIMEFRAME_BY_PRIORITY } from "@/lib/constants";
 import type {
   Category,
   Grievance,
   GrievanceLanguage,
   Priority,
   PublicUser,
+  ResolutionTimeframe,
   Role,
   Status,
 } from "@/lib/types";
@@ -53,6 +59,13 @@ const GRIEVANCE_SCHEMA = new Schema<Grievance>(
     createdAt: { type: String, required: true },
     updatedAt: { type: String, required: true },
     aiSummary: { type: String, default: "" },
+    recommendedResolution: { type: String, default: "" },
+    // `resolutionTimeframe` is a union of display strings; the schema stores it
+    // as a plain string and coerceGrievance() validates/repairs on read.
+    resolutionTimeframe: {
+      type: String,
+      default: "",
+    } as unknown as SchemaDefinitionProperty<ResolutionTimeframe, Grievance>,
     aiProcessed: { type: Boolean, default: false },
     duplicateOf: { type: [String], default: undefined },
   },
@@ -148,7 +161,18 @@ async function readLocal(): Promise<{
   let data: { users: UserRecord[]; grievances: Grievance[] };
   try {
     const raw = await readFile(DATA_FILE, "utf8");
-    data = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as {
+      users: UserRecord[];
+      grievances: Grievance[];
+    };
+    data = {
+      users: parsed.users ?? [],
+      // Backfill fields added after older records were written, so consumers
+      // can read them unconditionally.
+      grievances: (parsed.grievances ?? [])
+        .map(coerceGrievance)
+        .filter((g): g is Grievance => g !== null),
+    };
   } catch {
     data = { users: [], grievances: [] };
   }
@@ -230,6 +254,13 @@ function coerceGrievance(raw: unknown): Grievance | null {
     ...g,
     aiProcessed: Boolean(g.aiProcessed),
     aiSummary: g.aiSummary ?? "",
+    // Records written before this field existed read back as empty rather
+    // than undefined, so consumers can render it unconditionally.
+    recommendedResolution: g.recommendedResolution ?? "",
+    // Older rows predate this field; derive it from the AI-assigned priority so
+    // the citizen summary never renders blank.
+    resolutionTimeframe:
+      g.resolutionTimeframe ?? TIMEFRAME_BY_PRIORITY[g.priority],
     duplicateOf: Array.isArray(g.duplicateOf) ? g.duplicateOf : undefined,
     submitterName: g.submitterName ?? "Citizen",
   };
@@ -276,6 +307,40 @@ export async function findGrievanceById(
   }
   const local = await readLocal();
   return local.grievances.find((g) => g.id === id) ?? null;
+}
+
+function escapeRegex(value: string): string {
+  return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+}
+
+/**
+ * Resolve a grievance from what citizens are actually given: either the full
+ * id or the short reference shown on the confirmation screen (the first 8
+ * characters, uppercased). Matching is case-insensitive; a prefix only counts
+ * when it matches exactly one grievance.
+ */
+export async function findGrievanceByReference(
+  reference: string,
+): Promise<Grievance | null> {
+  const ref = reference.trim().toLowerCase();
+  if (!ref) return null;
+
+  const models = await getMongoModels();
+  if (models) {
+    const exact = await models.Grievance.findOne({ id: ref }).lean<Grievance | null>();
+    if (exact) return coerceGrievance(exact);
+    const matches = await models.Grievance.find({ id: { $regex: `^${escapeRegex(ref)}` } })
+      .limit(2)
+      .lean<Grievance[]>();
+    if (matches.length !== 1) return null;
+    return coerceGrievance(matches[0]);
+  }
+
+  const local = await readLocal();
+  const exact = local.grievances.find((g) => g.id.toLowerCase() === ref);
+  if (exact) return exact;
+  const matches = local.grievances.filter((g) => g.id.toLowerCase().startsWith(ref));
+  return matches.length === 1 ? matches[0] : null;
 }
 
 export async function listGrievancesByUser(userId: string): Promise<Grievance[]> {

@@ -88,6 +88,8 @@ export async function POST(request: Request) {
     createdAt: now,
     updatedAt: now,
     aiSummary: analysis.summary,
+    recommendedResolution: analysis.recommendedResolution,
+    resolutionTimeframe: analysis.resolutionTimeframe,
     aiProcessed,
   };
 
