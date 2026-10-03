@@ -3,6 +3,7 @@
 import { useEffect, useRef, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
+import { ResolutionNote } from "@/components/resolution-note";
 import {
   CategoryBadge,
   LanguageBadge,
@@ -212,19 +213,14 @@ export default function SubmitPage() {
               </div>
             </div>
 
-            {g.recommendedResolution && (
-              <div className="animate-fade-up rounded-xl border border-info/25 bg-info-soft/60 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-info">
-                  🤖 AI-Recommended Resolution Steps
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink">
-                  {g.recommendedResolution}
-                </p>
-                <p className="mt-2 text-xs text-muted">
-                  Guidance for the {dept} — the officer handling your complaint.
-                </p>
-              </div>
-            )}
+            <ResolutionNote
+              category={g.category}
+              priority={g.priority}
+              recommendedResolution={g.recommendedResolution}
+              resolutionTimeframe={g.resolutionTimeframe}
+              aiProcessed={g.aiProcessed}
+              className="animate-fade-up"
+            />
 
             {result.similar.length > 0 && (
               <div className="animate-fade-up rounded-xl border border-warn/25 bg-warn-soft/50 p-4">

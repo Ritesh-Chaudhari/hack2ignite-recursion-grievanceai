@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { TIMEFRAME_BY_PRIORITY } from "@/lib/constants";
 import { countGrievances, insertGrievance } from "@/lib/store";
 import type { Grievance } from "@/lib/types";
 
@@ -210,6 +211,7 @@ async function doSeed(): Promise<{ seeded: boolean; count?: number }> {
       updatedAt: createdAt,
       aiSummary: s.aiSummary,
       recommendedResolution: s.recommendedResolution,
+      resolutionTimeframe: TIMEFRAME_BY_PRIORITY[s.priority],
       aiProcessed: true,
       duplicateOf:
         s.title === "Streetlights not working near park"

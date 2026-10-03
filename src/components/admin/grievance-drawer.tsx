@@ -8,6 +8,7 @@ import {
   StatusBadge,
 } from "@/components/badges";
 import { StatusTimeline } from "@/components/status-timeline";
+import { ResolutionNote } from "@/components/resolution-note";
 import { CATEGORIES, DEPARTMENTS, PRIORITIES, STATUSES } from "@/lib/constants";
 import type { Category, Grievance, Priority, Status } from "@/lib/types";
 
@@ -146,27 +147,13 @@ export function GrievanceDrawer({
             </p>
           </div>
 
-          {grievance.recommendedResolution && (
-            <div className="rounded-xl border border-info/25 bg-info-soft/60 p-4">
-              <p className="text-xs font-bold uppercase tracking-wide text-info">
-                🤖 AI-Recommended Resolution Steps
-                {grievance.aiProcessed ? "" : " (heuristic fallback)"}
-              </p>
-              <p className="mt-1.5 text-sm leading-relaxed text-ink">
-                {grievance.recommendedResolution}
-              </p>
-              <p className="mt-2 text-xs text-muted">
-                Suggested for the {DEPARTMENTS[grievance.category]} · Suggested within
-                {grievance.priority === "Urgent"
-                  ? " 24 hours"
-                  : grievance.priority === "High"
-                    ? " 2-3 days"
-                    : grievance.priority === "Medium"
-                      ? " a week"
-                      : " two weeks"}.
-              </p>
-            </div>
-          )}
+          <ResolutionNote
+            category={grievance.category}
+            priority={grievance.priority}
+            recommendedResolution={grievance.recommendedResolution}
+            resolutionTimeframe={grievance.resolutionTimeframe}
+            aiProcessed={grievance.aiProcessed}
+          />
 
           <div>
             <h3 className="text-xs font-bold uppercase tracking-wide text-muted">

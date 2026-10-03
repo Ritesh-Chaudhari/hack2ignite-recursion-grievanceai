@@ -3,6 +3,7 @@
 import { useEffect, useState } from "react";
 import Link from "next/link";
 import { useAuth } from "@/components/auth-provider";
+import { ResolutionNote } from "@/components/resolution-note";
 import {
   CategoryBadge,
   LanguageBadge,
@@ -10,7 +11,6 @@ import {
   StatusBadge,
 } from "@/components/badges";
 import { StatusTimeline } from "@/components/status-timeline";
-import { DEPARTMENTS } from "@/lib/constants";
 import type { Grievance } from "@/lib/types";
 
 function formatDate(iso: string): string {
@@ -178,20 +178,14 @@ export default function MyGrievancesPage() {
                   </p>
                 )}
 
-                {g.recommendedResolution && (
-                  <div className="mt-3 rounded-lg border border-info/25 bg-info-soft/60 px-3.5 py-2.5">
-                    <p className="text-xs font-bold uppercase tracking-wide text-info">
-                      🤖 AI-Recommended Resolution Steps
-                    </p>
-                    <p className="mt-1 text-sm leading-relaxed text-ink">
-                      {g.recommendedResolution}
-                    </p>
-                  </div>
-                )}
-
-                <p className="mt-3 text-xs text-muted">
-                  Routed to <span className="font-semibold text-primary">{DEPARTMENTS[g.category]}</span>
-                </p>
+                <ResolutionNote
+                  category={g.category}
+                  priority={g.priority}
+                  recommendedResolution={g.recommendedResolution}
+                  resolutionTimeframe={g.resolutionTimeframe}
+                  aiProcessed={g.aiProcessed}
+                  className="mt-3"
+                />
 
                 <div className="mt-5 border-t border-line pt-5">
                   <StatusTimeline status={g.status} />

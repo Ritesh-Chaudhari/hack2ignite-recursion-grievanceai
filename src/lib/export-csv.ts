@@ -19,6 +19,7 @@ export function grievancesToCsv(grievances: Grievance[]): string {
     "Updated At",
     "AI Summary",
     "AI Recommended Resolution",
+    "Estimated Resolution Timeframe",
     "AI Processed",
   ];
 
@@ -37,6 +38,7 @@ export function grievancesToCsv(grievances: Grievance[]): string {
     g.updatedAt,
     escapeCsvField(g.aiSummary),
     escapeCsvField(g.recommendedResolution ?? ""),
+    escapeCsvField(g.resolutionTimeframe ?? ""),
     g.aiProcessed ? "Yes" : "No",
   ]);
 

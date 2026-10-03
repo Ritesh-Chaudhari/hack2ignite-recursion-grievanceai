@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { CategoryBadge, PriorityBadge, StatusBadge } from "@/components/badges";
+import { ResolutionNote } from "@/components/resolution-note";
 import { StatusTimeline } from "@/components/status-timeline";
 import { DEPARTMENTS } from "@/lib/constants";
 import type { Grievance, PublicGrievance, TrackGrievanceResponse } from "@/lib/types";
@@ -170,19 +171,13 @@ export default function TrackPage() {
               </div>
             )}
 
-            {grievance.recommendedResolution && (
-              <div className="rounded-xl border border-info/25 bg-info-soft/60 p-4">
-                <p className="text-xs font-bold uppercase tracking-wide text-info">
-                  🤖 AI-Recommended Resolution Steps
-                </p>
-                <p className="mt-1.5 text-sm leading-relaxed text-ink">
-                  {grievance.recommendedResolution}
-                </p>
-                <p className="mt-2 text-xs text-muted">
-                  What the {DEPARTMENTS[grievance.category]} plans to do about it.
-                </p>
-              </div>
-            )}
+            <ResolutionNote
+              category={grievance.category}
+              priority={grievance.priority}
+              recommendedResolution={grievance.recommendedResolution}
+              resolutionTimeframe={grievance.resolutionTimeframe}
+              aiProcessed={grievance.aiProcessed}
+            />
           </div>
         </div>
       )}

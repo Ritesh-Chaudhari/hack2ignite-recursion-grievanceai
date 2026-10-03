@@ -3,12 +3,14 @@ import {
   CATEGORIES,
   DEPARTMENTS,
   PRIORITIES,
+  TIMEFRAME_BY_PRIORITY,
 } from "@/lib/constants";
 import type {
   Category,
   GrievanceAnalysis,
   GrievanceLanguage,
   Priority,
+  ResolutionTimeframe,
 } from "@/lib/types";
 
 /**
@@ -66,6 +68,9 @@ For every grievance you must:
    Write it in English even if the complaint is in another language. Give practical municipal advice
    (e.g. "isolate the leak, replace the damaged 2-inch pipe section, then flush and test the line");
    never invent facts about the complaint itself.
+6. resolutionTimeframe — pick exactly one estimate for how long the full fix takes, from this
+   list: "Same day", "24 hours", "2-3 days", "About a week", "Within two weeks".
+   It must agree with the timeframe you gave in recommendedResolution and with your priority.
 
 Respond with JSON only, matching the provided schema.`;
 
@@ -80,6 +85,10 @@ const RESPONSE_SCHEMA = {
     priority: { type: Type.STRING, enum: [...PRIORITIES] },
     summary: { type: Type.STRING },
     recommendedResolution: { type: Type.STRING },
+    resolutionTimeframe: {
+      type: Type.STRING,
+      enum: ["Same day", "24 hours", "2-3 days", "About a week", "Within two weeks"],
+    },
   },
   required: [
     "detectedLanguage",
@@ -87,6 +96,7 @@ const RESPONSE_SCHEMA = {
     "priority",
     "summary",
     "recommendedResolution",
+    "resolutionTimeframe",
   ],
 } as const;
 
@@ -176,6 +186,19 @@ function resolutionHeuristic(category: Category, priority: Priority): string {
   return `${RESOLUTION_TIPS[category]}. Expected to be completed ${SLA_TEXT[priority]}.`;
 }
 
+/** The same window, as the short token the citizen view renders. */
+function timeframeHeuristic(priority: Priority): ResolutionTimeframe {
+  return TIMEFRAME_BY_PRIORITY[priority];
+}
+
+const TIMEFRAMES: readonly ResolutionTimeframe[] = [
+  "Same day",
+  "24 hours",
+  "2-3 days",
+  "About a week",
+  "Within two weeks",
+];
+
 const CATEGORY_KEYWORDS: Record<Category, string[]> = {
   Water: ["water", "pipe", "leak", "tap", "supply", "sewage", "drainage", "paani", "पानी", "नल", "रिसाव", "गटार", "पाणी", "नळ", "गळती"],
   Roads: ["road", "pothole", "footpath", "street", "divider", "flyover", "sadak", "सड़क", "रास्ता", "गड्ढा", "रस्ता", "खड्डा", "फुटपाथ"],
@@ -240,6 +263,7 @@ function fallbackAnalysis(
       DEPARTMENTS[selectedCategory]
     }.`,
     recommendedResolution: resolutionHeuristic(category, priority),
+    resolutionTimeframe: timeframeHeuristic(priority),
   };
 }
 
@@ -318,6 +342,13 @@ export async function analyzeGrievance(
       parsed.recommendedResolution.trim().length > 0
         ? parsed.recommendedResolution.trim()
         : resolutionHeuristic(category, priority);
+    // Keep the citizen summary consistent with the prose above: fall back to
+    // the priority window if the model omitted or garbled the enum.
+    const resolutionTimeframe: ResolutionTimeframe = TIMEFRAMES.includes(
+      parsed.resolutionTimeframe as ResolutionTimeframe,
+    )
+      ? (parsed.resolutionTimeframe as ResolutionTimeframe)
+      : timeframeHeuristic(priority);
 
     return {
       analysis: {
@@ -326,6 +357,7 @@ export async function analyzeGrievance(
         priority,
         summary,
         recommendedResolution,
+        resolutionTimeframe,
       },
       aiProcessed: true,
     };

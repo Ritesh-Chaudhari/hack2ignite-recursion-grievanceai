@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { CATEGORIES, PRIORITIES, STATUSES } from "@/lib/constants";
+import { CATEGORIES, PRIORITIES, STATUSES, TIMEFRAME_BY_PRIORITY } from "@/lib/constants";
 import { getSession } from "@/lib/session";
 import { findGrievanceByReference, updateGrievance } from "@/lib/store";
 import type {
@@ -24,6 +24,8 @@ function toPublicGrievance(g: Grievance): PublicGrievance {
     updatedAt: g.updatedAt,
     aiSummary: g.aiSummary,
     recommendedResolution: g.recommendedResolution,
+    resolutionTimeframe:
+      g.resolutionTimeframe ?? TIMEFRAME_BY_PRIORITY[g.priority],
     aiProcessed: g.aiProcessed,
   };
 }

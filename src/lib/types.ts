@@ -31,6 +31,17 @@ export interface SessionPayload {
   role: Role;
 }
 
+/**
+ * Estimated time to resolve, produced by Gemini alongside the prose steps so
+ * the citizen-facing summary and the officer-facing detail stay in sync.
+ */
+export type ResolutionTimeframe =
+  | "Same day"
+  | "24 hours"
+  | "2-3 days"
+  | "About a week"
+  | "Within two weeks";
+
 export interface GrievanceAnalysis {
   detectedLanguage: GrievanceLanguage;
   category: Category;
@@ -38,6 +49,8 @@ export interface GrievanceAnalysis {
   summary: string;
   /** Short actionable guidance for the officer: steps, typical fix, timeframe. */
   recommendedResolution: string;
+  /** Structured estimate extracted from the same analysis, for the citizen view. */
+  resolutionTimeframe: ResolutionTimeframe;
 }
 
 /** A grievance as serialized over the API / stored in the DB. */
@@ -62,6 +75,11 @@ export interface Grievance {
    * Empty for records created before this field existed.
    */
   recommendedResolution: string;
+  /**
+   * Short estimate (e.g. "2-3 days") shown to citizens. Derived from the same
+   * AI analysis as `recommendedResolution` — never a separate lookup.
+   */
+  resolutionTimeframe: ResolutionTimeframe;
   /** True when Gemini failed and defaults/manual triage were used instead. */
   aiProcessed: boolean;
   /** Comma-separated list of similarity reasons when grouped as a duplicate. */
@@ -83,8 +101,10 @@ export interface PublicGrievance {
   createdAt: string;
   updatedAt: string;
   aiSummary: string;
-  /** AI-recommended resolution steps shown to citizens while tracking. */
+  /** Officer-facing resolution prose (rendered only for admins). */
   recommendedResolution: string;
+  /** Citizen-facing estimate drawn from the same analysis. */
+  resolutionTimeframe: ResolutionTimeframe;
   aiProcessed: boolean;
 }
 

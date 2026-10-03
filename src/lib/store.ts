@@ -1,14 +1,20 @@
 import { randomUUID } from "node:crypto";
 import { mkdir, readFile, writeFile } from "node:fs/promises";
 import path from "node:path";
-import mongoose, { type Model, Schema } from "mongoose";
+import mongoose, {
+  type Model,
+  type SchemaDefinitionProperty,
+  Schema,
+} from "mongoose";
 import { validateEnv } from "@/lib/env";
+import { TIMEFRAME_BY_PRIORITY } from "@/lib/constants";
 import type {
   Category,
   Grievance,
   GrievanceLanguage,
   Priority,
   PublicUser,
+  ResolutionTimeframe,
   Role,
   Status,
 } from "@/lib/types";
@@ -54,6 +60,12 @@ const GRIEVANCE_SCHEMA = new Schema<Grievance>(
     updatedAt: { type: String, required: true },
     aiSummary: { type: String, default: "" },
     recommendedResolution: { type: String, default: "" },
+    // `resolutionTimeframe` is a union of display strings; the schema stores it
+    // as a plain string and coerceGrievance() validates/repairs on read.
+    resolutionTimeframe: {
+      type: String,
+      default: "",
+    } as unknown as SchemaDefinitionProperty<ResolutionTimeframe, Grievance>,
     aiProcessed: { type: Boolean, default: false },
     duplicateOf: { type: [String], default: undefined },
   },
@@ -245,6 +257,10 @@ function coerceGrievance(raw: unknown): Grievance | null {
     // Records written before this field existed read back as empty rather
     // than undefined, so consumers can render it unconditionally.
     recommendedResolution: g.recommendedResolution ?? "",
+    // Older rows predate this field; derive it from the AI-assigned priority so
+    // the citizen summary never renders blank.
+    resolutionTimeframe:
+      g.resolutionTimeframe ?? TIMEFRAME_BY_PRIORITY[g.priority],
     duplicateOf: Array.isArray(g.duplicateOf) ? g.duplicateOf : undefined,
     submitterName: g.submitterName ?? "Citizen",
   };
