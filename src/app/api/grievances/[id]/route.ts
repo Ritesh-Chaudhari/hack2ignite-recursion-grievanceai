@@ -23,6 +23,7 @@ function toPublicGrievance(g: Grievance): PublicGrievance {
     createdAt: g.createdAt,
     updatedAt: g.updatedAt,
     aiSummary: g.aiSummary,
+    recommendedResolution: g.recommendedResolution,
     aiProcessed: g.aiProcessed,
   };
 }

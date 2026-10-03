@@ -169,6 +169,20 @@ export default function TrackPage() {
                 </p>
               </div>
             )}
+
+            {grievance.recommendedResolution && (
+              <div className="rounded-xl border border-info/25 bg-info-soft/60 p-4">
+                <p className="text-xs font-bold uppercase tracking-wide text-info">
+                  🤖 AI-Recommended Resolution Steps
+                </p>
+                <p className="mt-1.5 text-sm leading-relaxed text-ink">
+                  {grievance.recommendedResolution}
+                </p>
+                <p className="mt-2 text-xs text-muted">
+                  What the {DEPARTMENTS[grievance.category]} plans to do about it.
+                </p>
+              </div>
+            )}
           </div>
         </div>
       )}

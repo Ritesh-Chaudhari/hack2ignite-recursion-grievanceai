@@ -53,6 +53,7 @@ const GRIEVANCE_SCHEMA = new Schema<Grievance>(
     createdAt: { type: String, required: true },
     updatedAt: { type: String, required: true },
     aiSummary: { type: String, default: "" },
+    recommendedResolution: { type: String, default: "" },
     aiProcessed: { type: Boolean, default: false },
     duplicateOf: { type: [String], default: undefined },
   },
@@ -148,7 +149,18 @@ async function readLocal(): Promise<{
   let data: { users: UserRecord[]; grievances: Grievance[] };
   try {
     const raw = await readFile(DATA_FILE, "utf8");
-    data = JSON.parse(raw);
+    const parsed = JSON.parse(raw) as {
+      users: UserRecord[];
+      grievances: Grievance[];
+    };
+    data = {
+      users: parsed.users ?? [],
+      // Backfill fields added after older records were written, so consumers
+      // can read them unconditionally.
+      grievances: (parsed.grievances ?? [])
+        .map(coerceGrievance)
+        .filter((g): g is Grievance => g !== null),
+    };
   } catch {
     data = { users: [], grievances: [] };
   }
@@ -230,6 +242,9 @@ function coerceGrievance(raw: unknown): Grievance | null {
     ...g,
     aiProcessed: Boolean(g.aiProcessed),
     aiSummary: g.aiSummary ?? "",
+    // Records written before this field existed read back as empty rather
+    // than undefined, so consumers can render it unconditionally.
+    recommendedResolution: g.recommendedResolution ?? "",
     duplicateOf: Array.isArray(g.duplicateOf) ? g.duplicateOf : undefined,
     submitterName: g.submitterName ?? "Citizen",
   };

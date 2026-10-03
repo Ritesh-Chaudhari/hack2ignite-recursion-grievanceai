@@ -178,6 +178,17 @@ export default function MyGrievancesPage() {
                   </p>
                 )}
 
+                {g.recommendedResolution && (
+                  <div className="mt-3 rounded-lg border border-info/25 bg-info-soft/60 px-3.5 py-2.5">
+                    <p className="text-xs font-bold uppercase tracking-wide text-info">
+                      🤖 AI-Recommended Resolution Steps
+                    </p>
+                    <p className="mt-1 text-sm leading-relaxed text-ink">
+                      {g.recommendedResolution}
+                    </p>
+                  </div>
+                )}
+
                 <p className="mt-3 text-xs text-muted">
                   Routed to <span className="font-semibold text-primary">{DEPARTMENTS[g.category]}</span>
                 </p>

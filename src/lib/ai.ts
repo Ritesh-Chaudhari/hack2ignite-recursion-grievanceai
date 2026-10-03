@@ -58,6 +58,14 @@ For every grievance you must:
    Medium = recurring or multi-day single-area issues. Low = cosmetic or minor inconveniences.
 4. summary — a neutral 1-2 sentence English summary of the complaint, regardless of input language.
    Mention what, where, and the impact. Never invent facts not present in the complaint.
+5. recommendedResolution — a short, actionable recommendation for the municipal officer who must
+   fix this. Cover three things in 2-3 plain sentences (no markdown, no numbered list, no header):
+   the concrete steps to take, what typically resolves this type of issue, and an estimated
+   resolution timeframe. Calibrate the timeframe to priority (Urgent: same day/24h, High: 2-3 days,
+   Medium: about a week, Low: within two weeks) and to what the department realistically does.
+   Write it in English even if the complaint is in another language. Give practical municipal advice
+   (e.g. "isolate the leak, replace the damaged 2-inch pipe section, then flush and test the line");
+   never invent facts about the complaint itself.
 
 Respond with JSON only, matching the provided schema.`;
 
@@ -71,8 +79,15 @@ const RESPONSE_SCHEMA = {
     category: { type: Type.STRING, enum: [...CATEGORIES] },
     priority: { type: Type.STRING, enum: [...PRIORITIES] },
     summary: { type: Type.STRING },
+    recommendedResolution: { type: Type.STRING },
   },
-  required: ["detectedLanguage", "category", "priority", "summary"],
+  required: [
+    "detectedLanguage",
+    "category",
+    "priority",
+    "summary",
+    "recommendedResolution",
+  ],
 } as const;
 
 export interface AnalysisResult {
@@ -136,6 +151,31 @@ function detectLanguageHeuristic(
   return selected === "English" ? "Hindi" : selected;
 }
 
+/**
+ * Per-category guidance used when Gemini is unavailable. Combined with an
+ * SLA-derived timeframe so the field is still useful offline.
+ */
+const RESOLUTION_TIPS: Record<Category, string> = {
+  Water: "Shut off the affected valve, replace or reseal the leaking pipe joint, then flush the line and test the supply before restoring it to households",
+  Roads: "Sweep and fill the pothole with wet mix in layers, compact each layer, and mark the patch until it cures; resurface the stretch if the base is damaged",
+  Electricity: "De-energize the line, replace the damaged conductor or insulator, re-tension it, and confirm the fix with a continuity and earth-leakage test",
+  Sanitation: "Deploy a clearing crew and a jetting machine to remove the blockage, sanitize the area, and put the route on a fixed weekly collection schedule",
+  Safety: "Cordon the hazard, inspect it with the relevant technical team, repair or remove the danger, and post a warning sign until the site is cleared",
+  Other: "Assign an inspecting officer to verify the issue on site, carry out the standard repair for this category, and confirm closure with the complainant",
+};
+
+/** Maps priority to the SLA window quoted in the offline recommendation. */
+const SLA_TEXT: Record<Priority, string> = {
+  Urgent: "within 24 hours",
+  High: "within 2-3 days",
+  Medium: "within a week",
+  Low: "within two weeks",
+};
+
+function resolutionHeuristic(category: Category, priority: Priority): string {
+  return `${RESOLUTION_TIPS[category]}. Expected to be completed ${SLA_TEXT[priority]}.`;
+}
+
 const CATEGORY_KEYWORDS: Record<Category, string[]> = {
   Water: ["water", "pipe", "leak", "tap", "supply", "sewage", "drainage", "paani", "पानी", "नल", "रिसाव", "गटार", "पाणी", "नळ", "गळती"],
   Roads: ["road", "pothole", "footpath", "street", "divider", "flyover", "sadak", "सड़क", "रास्ता", "गड्ढा", "रस्ता", "खड्डा", "फुटपाथ"],
@@ -190,13 +230,16 @@ function fallbackAnalysis(
   selectedLanguage: GrievanceLanguage,
   selectedCategory: Category,
 ): GrievanceAnalysis {
+  const category = classifyHeuristic(title, description, selectedCategory);
+  const priority = priorityHeuristic(title, description);
   return {
     detectedLanguage: detectLanguageHeuristic(`${title} ${description}`, selectedLanguage),
-    category: classifyHeuristic(title, description, selectedCategory),
-    priority: priorityHeuristic(title, description),
+    category,
+    priority,
     summary: `${title} — reported at the citizen's location. Pending officer review; routed to the ${
       DEPARTMENTS[selectedCategory]
     }.`,
+    recommendedResolution: resolutionHeuristic(category, priority),
   };
 }
 
@@ -270,9 +313,20 @@ export async function analyzeGrievance(
       typeof parsed.summary === "string" && parsed.summary.trim().length > 0
         ? parsed.summary.trim()
         : fallbackAnalysis(title, description, selectedLanguage, category).summary;
+    const recommendedResolution =
+      typeof parsed.recommendedResolution === "string" &&
+      parsed.recommendedResolution.trim().length > 0
+        ? parsed.recommendedResolution.trim()
+        : resolutionHeuristic(category, priority);
 
     return {
-      analysis: { detectedLanguage, category, priority, summary },
+      analysis: {
+        detectedLanguage,
+        category,
+        priority,
+        summary,
+        recommendedResolution,
+      },
       aiProcessed: true,
     };
   } catch (err) {
